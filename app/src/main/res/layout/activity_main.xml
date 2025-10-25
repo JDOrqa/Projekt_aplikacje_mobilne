@@ -1,6 +1,351 @@
 <?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#FFBB86FC</color>
+    <color name="primary_dark">#FF3700B3</color>
+</resources>
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.hardware.lights.Light
+import android.location.Location
+import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
+import com.example.gralosowa.databinding.ActivityMainBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import kotlin.random.Random
+JKM — Wczoraj o 16:24
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#FF6200EE</color>
+    <color name="primary_dark">#FF3700B3</color>
+</resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Base.Theme.SlotMaster" parent="Theme.Material3.DayNight">
+
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+    </style>
+
+    <style name="Theme.SlotMaster" parent="Base.Theme.SlotMaster" />
+</resources>
+JKM — 12:43
+Dla krzyska
+app/src/main/res/layout/activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SLOT MASTER"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Wyświetlacz salda -->
+        <TextView
+            android:id="@+id/tvBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Saldo: 1000"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Sloty -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <TextView
+                android:id="@+id/slot1"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:text="🍒"
+                android:textSize="40sp"
+                android:background="@drawable/slot_border"
+                android:layout_margin="8dp" />
+
+            <TextView
+                android:id="@+id/slot2"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:text="🍒"
+                android:textSize="40sp"
+                android:background="@drawable/slot_border"
+                android:layout_margin="8dp" />
+
+            <TextView
+                android:id="@+id/slot3"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:text="🍒"
+                android:textSize="40sp"
+                android:background="@drawable/slot_border"
+                android:layout_margin="8dp" />
+
+        </LinearLayout>
+
+        <!-- Przyciski -->
+        <Button
+            android:id="@+id/btnSpin"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="SPIN (10 punktów)"
+            android:textSize="17sp"
+            android:layout_marginBottom="4dp"
+            style="@style/Widget.Material3.Button" />
+
+        <Button
+            android:id="@+id/btnReset"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Reset Gry"
+            android:textSize="18sp"
+            android:layout_marginBottom="32dp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        <!-- Sekcja informacji o czujnikach -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+... (Pozostałe wiersze: 91)
+Zwiń
+activity_main.txt
+8 KB
+2 plik app/src/main/res/drawable/slot_border.xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <stroke
+        android:width="2dp"
+        android:color="@color/primary" />
+    <corners android:radius="8dp" />
+</shape>
+﻿
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SLOT MASTER"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Wyświetlacz salda -->
+        <TextView
+            android:id="@+id/tvBalance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Saldo: 1000"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Sloty -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <TextView
+                android:id="@+id/slot1"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:text="🍒"
+                android:textSize="40sp"
+                android:background="@drawable/slot_border"
+                android:layout_margin="8dp" />
+
+            <TextView
+                android:id="@+id/slot2"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:text="🍒"
+                android:textSize="40sp"
+                android:background="@drawable/slot_border"
+                android:layout_margin="8dp" />
+
+            <TextView
+                android:id="@+id/slot3"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:gravity="center"
+                android:text="🍒"
+                android:textSize="40sp"
+                android:background="@drawable/slot_border"
+                android:layout_margin="8dp" />
+
+        </LinearLayout>
+
+        <!-- Przyciski -->
+        <Button
+            android:id="@+id/btnSpin"
+            android:layout_width="200dp"
+            android:layout_height="60dp"
+            android:text="SPIN (10 punktów)"
+            android:textSize="17sp"
+            android:layout_marginBottom="4dp"
+            style="@style/Widget.Material3.Button" />
+
+        <Button
+            android:id="@+id/btnReset"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Reset Gry"
+            android:textSize="18sp"
+            android:layout_marginBottom="32dp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+        <!-- Sekcja informacji o czujnikach -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Informacje o czujnikach"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Akcelerometr -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Akcelerometr: Potrząśnij aby zakręcić"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Czujnik światła -->
+                <TextView
+                    android:id="@+id/tvLightInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tryb: Jasny"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- GPS -->
+                <TextView
+                    android:id="@+id/tvLocationInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Odwiedzone lokacje: 0/3"
+                    android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Instrukcje -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Instrukcje"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Potrząśnij telefonem aby zakręcić"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Zmień oświetlenie aby przełączyć tryb jasny/ciemny"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Odwiedź specjalne lokalizacje aby zdobyć 100 punktów"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
 
 </ScrollView>
+
+8 KB
