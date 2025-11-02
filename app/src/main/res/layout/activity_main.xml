@@ -5,21 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+    android:background="?android:attr/colorBackground"
     tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:background="?android:attr/colorBackground">
 
+        <!-- Tytuł -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SLOT MASTER"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/primary"
+            android:textColor="?android:attr/colorAccent"
             android:layout_marginBottom="32dp" />
 
         <!-- Wyświetlacz salda -->
@@ -30,6 +33,7 @@
             android:text="Saldo: 1000"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textColor="?android:attr/colorAccent"
             android:layout_marginBottom="24dp" />
 
         <!-- Sloty -->
@@ -40,47 +44,51 @@
             android:gravity="center"
             android:layout_marginBottom="32dp">
 
-            <TextView
+            <ImageView
                 android:id="@+id/slot1"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:gravity="center"
-                android:text="🍒"
-                android:textSize="40sp"
-                android:background="@drawable/slot_border"
-                android:layout_margin="8dp" />
+                android:background="@drawable/slot_border_dark"
+                android:scaleType="centerInside"
+                android:padding="8dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/cherry" />
 
-            <TextView
+            <ImageView
                 android:id="@+id/slot2"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:gravity="center"
-                android:text="🍒"
-                android:textSize="40sp"
-                android:background="@drawable/slot_border"
-                android:layout_margin="8dp" />
+                android:background="@drawable/slot_border_dark"
+                android:scaleType="centerInside"
+                android:padding="8dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/cherry" />
 
-            <TextView
+            <ImageView
                 android:id="@+id/slot3"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                android:gravity="center"
-                android:text="🍒"
-                android:textSize="40sp"
-                android:background="@drawable/slot_border"
-                android:layout_margin="8dp" />
+                android:background="@drawable/slot_border_dark"
+                android:scaleType="centerInside"
+                android:padding="8dp"
+                android:layout_margin="8dp"
+                android:src="@drawable/cherry" />
 
         </LinearLayout>
 
-        <!-- Przyciski -->
+        <!-- Przyciski akcji -->
         <Button
             android:id="@+id/btnSpin"
             android:layout_width="200dp"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:text="SPIN (10 punktów)"
-            android:textSize="17sp"
-            android:layout_marginBottom="4dp"
-            style="@style/Widget.Material3.Button" />
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:backgroundTint="?android:attr/colorAccent"
+            android:layout_marginBottom="16dp" />
+
+
 
         <Button
             android:id="@+id/btnReset"
@@ -88,16 +96,19 @@
             android:layout_height="wrap_content"
             android:text="Reset Gry"
             android:textSize="18sp"
-            android:layout_marginBottom="32dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary"
+            android:backgroundTint="?android:attr/colorBackgroundFloating"
+            android:layout_marginBottom="32dp" />
 
         <!-- Sekcja informacji o czujnikach -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
+            app:cardBackgroundColor="?android:attr/colorBackgroundFloating"
             app:cardUseCompatPadding="true">
 
             <LinearLayout
@@ -112,14 +123,16 @@
                     android:text="Informacje o czujnikach"
                     android:textSize="20sp"
                     android:textStyle="bold"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Akcelerometr -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Akcelerometr: Potrząśnij aby zakręcić"
+                    android:text="• Akcelerometr: Potrząśnij aby zakręcić"
                     android:textSize="14sp"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginBottom="8dp" />
 
                 <!-- Czujnik światła -->
@@ -127,8 +140,9 @@
                     android:id="@+id/tvLightInfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Tryb: Jasny"
+                    android:text="Tryb: AUTO"
                     android:textSize="14sp"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginBottom="8dp" />
 
                 <!-- GPS -->
@@ -137,18 +151,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Odwiedzone lokacje: 0/3"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:textColor="?android:attr/textColorSecondary" />
 
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
 
         <!-- Instrukcje -->
-        <com.google.android.material.card.MaterialCardView
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="?android:attr/colorBackgroundFloating"
+            app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -162,30 +179,38 @@
                     android:text="Instrukcje"
                     android:textSize="20sp"
                     android:textStyle="bold"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="• Potrząśnij telefonem aby zakręcić"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="• Zmień oświetlenie aby przełączyć tryb jasny/ciemny"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="• Odwiedź specjalne lokalizacje aby zdobyć 100 punktów"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+
 
             </LinearLayout>
 
-        </com.google.android.material.card.MaterialCardView>
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
+
+    
 
 </ScrollView>
