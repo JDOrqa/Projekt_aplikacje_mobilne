@@ -63,18 +63,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         sensorManager.unregisterListener(this)
     }
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        event?.let { sensorEvent ->
-            if (sensorEvent.sensor.type == Sensor.TYPE_LIGHT) {
-                val lightValue = sensorEvent.values[0]
-                runOnUiThread {
-                    if (lightValue < 50) {
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                        binding.tvLightInfo.text = "Tryb: Ciemny (${"%.1f".format(lightValue)} lux)"
-                    } else {
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                        binding.tvLightInfo.text = "Tryb: Jasny (${"%.1f".format(lightValue)} lux)"
-                    }
+    private fun handleLightSensor(lightValue: Float) {
+        runOnUiThread {
+            if (lightValue < 1) {
+                if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_YES) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    // ZAPISZ STAN MOTYWU
+                    getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                        .edit().putBoolean(KEY_DARK_MODE, true).apply()
+                    binding.tvLightInfo.text = "🌙 Tryb: CIEMNY (${"%.1f".format(lightValue)} lux)"
+                }
+            } else {
+                if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    // ZAPISZ STAN MOTYWU
+                    getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                        .edit().putBoolean(KEY_DARK_MODE, false).apply()
+                    binding.tvLightInfo.text = "☀️ Tryb: JASNY (${"%.1f".format(lightValue)} lux)"
                 }
             }
         }
