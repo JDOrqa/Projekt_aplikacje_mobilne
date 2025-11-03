@@ -42,9 +42,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var slot3: ImageView
     
     private val targetLocations = listOf(
-        TargetLocation(52.2297, 21.0122, 1500.0, false),
-        TargetLocation(50.0647, 19.9450, 1500.0, false),
-        TargetLocation(51.1079, 17.0385, 1500.0, false)
+        TargetLocation(52.2297, 21.0122, 15000.0, false),
+        TargetLocation(50.0647, 19.9450, 15000.0, false),
+        TargetLocation(49.6218, 20.6971, 15000.0, false)
     )
     
     private val PREFS_NAME = "SlotMasterPrefs"
