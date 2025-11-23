@@ -611,6 +611,59 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    // Sprawdza czy trzeba zapisać poprzedni dzień (przy starcie aplikacji)
+    private fun checkAndSavePreviousDay() {
+        // Możesz dodać logikę sprawdzania czy minął dzień
+        // Na razie po prostu sprawdza czy dzisiaj już zapisano
+        saveDailyResultIfNeeded()
+    }
+
+    // Pokazuje historię wyników (możesz podpiąć pod nowy przycisk)
+    private fun showHistory() {
+        val history = gameHistoryManager.getRecentHistory(7)
+
+        if (history.isEmpty()) {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("📊 Historia Gier")
+                .setMessage("Brak zapisanych wyników z ostatnich 7 dni.\n\nGraj dalej, a wyniki pojawią się tutaj! 🎰")
+                .setPositiveButton("OK", null)
+                .show()
+            return
+        }
+
+        val historyText = history.joinToString("\n\n") { record ->
+            "📅 ${formatDisplayDate(record.gameDate)}\n" +
+                    "💰 Saldo: ${record.finalBalance} punktów\n" +
+                    "🎰 Spiny: ${record.spinsCount}\n" +
+                    "🏆 Największa wygrana: ${record.biggestWin}\n" +
+                    "⏰ Godzina: ${formatTime(record.createdAt)}"
+        }
+
+        android.app.AlertDialog.Builder(this)
+            .setTitle("📊 Historia 7 dni")
+            .setMessage(historyText)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Wyczyść historię") { dialog, _ ->
+                showClearHistoryConfirmation()
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
+    private fun formatDisplayDate(dbDate: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+            val date = inputFormat.parse(dbDate)
+            outputFormat.format(date ?: Date())
+        } catch (e: Exception) {
+            dbDate
+        }
+    }
+
+    
+
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     override fun onRequestPermissionsResult(
