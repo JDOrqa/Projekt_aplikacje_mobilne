@@ -18,3 +18,12 @@ class GameHistoryManager(private val dbHelper: GameHistoryHelper) {
     private fun getCurrentDateTime(): String {
         return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
     }
+fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolean {
+        val db = dbHelper.writableDatabase
+        val values = ContentValues().apply {
+            put("game_date", getCurrentDate())
+            put("final_balance", finalBalance)
+            put("spins_count", spinsCount)
+            put("biggest_win", biggestWin)
+            put("created_at", getCurrentDateTime())
+        }
