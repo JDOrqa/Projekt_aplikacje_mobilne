@@ -51,3 +51,7 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
             )
             history.add(gameHistory)
         }
+ cursor.close()
+        db.close()
+        return history
+    }
