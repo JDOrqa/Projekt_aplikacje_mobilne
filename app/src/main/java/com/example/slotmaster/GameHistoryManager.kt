@@ -39,3 +39,4 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
             WHERE game_date >= date('now', '-$days days') 
             ORDER BY game_date DESC
         """.trimIndent()
+        val cursor = db.rawQuery(query, null)
