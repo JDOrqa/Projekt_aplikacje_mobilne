@@ -34,3 +34,8 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
     fun getRecentHistory(days: Int = 7): List<GameHistory> {
         val history = mutableListOf<GameHistory>()
         val db = dbHelper.readableDatabase
+         val query = """
+            SELECT * FROM $TABLE_HISTORY 
+            WHERE game_date >= date('now', '-$days days') 
+            ORDER BY game_date DESC
+        """.trimIndent()
