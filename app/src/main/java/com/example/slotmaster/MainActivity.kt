@@ -662,7 +662,39 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    
+    private fun formatTime(dateTime: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val date = inputFormat.parse(dateTime)
+            outputFormat.format(date ?: Date())
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    private fun showClearHistoryConfirmation() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("🧹 Wyczyść historię")
+            .setMessage("Czy na pewno chcesz usunąć całą historię gier? Tej operacji nie można cofnąć.")
+            .setPositiveButton("TAK, wyczyść") { dialog, _ ->
+                clearAllHistory()
+                dialog.dismiss()
+            }
+            .setNegativeButton("NIE, zachowaj", null)
+            .show()
+    }
+
+    private fun clearAllHistory() {
+
+        val success = gameHistoryManager.clearAllHistory()
+
+        if (success) {
+            Toast.makeText(this, "Historia wyczyszczona!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Błąd podczas czyszczenia historii", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
