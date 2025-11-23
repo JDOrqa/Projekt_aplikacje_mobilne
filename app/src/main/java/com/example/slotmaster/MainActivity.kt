@@ -581,6 +581,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    private fun updateDailyResultInDatabase() {
+        if (gameHistoryManager.isTodaySaved()) {
+            // Jeśli już zapisano dzisiaj - USUŃ stary wpis
+            gameHistoryManager.deleteTodaysRecord()
+        }
+        // ZAPISZ nowy wpis z aktualnymi danymi
+        gameHistoryManager.saveDailyResult(
+            finalBalance = balance,
+            spinsCount = spinsCount,
+            biggestWin = biggestWin
+        )
+    }
+
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     override fun onRequestPermissionsResult(
