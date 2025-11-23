@@ -31,3 +31,6 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
         db.close()
         return result != -1L
     }
+    fun getRecentHistory(days: Int = 7): List<GameHistory> {
+        val history = mutableListOf<GameHistory>()
+        val db = dbHelper.readableDatabase
