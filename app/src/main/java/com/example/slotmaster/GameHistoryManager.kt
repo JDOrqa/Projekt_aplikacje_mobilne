@@ -40,3 +40,14 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
             ORDER BY game_date DESC
         """.trimIndent()
         val cursor = db.rawQuery(query, null)
+        while (cursor.moveToNext()) {
+            val gameHistory = GameHistory(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                gameDate = cursor.getString(cursor.getColumnIndexOrThrow("game_date")),
+                finalBalance = cursor.getInt(cursor.getColumnIndexOrThrow("final_balance")),
+                spinsCount = cursor.getInt(cursor.getColumnIndexOrThrow("spins_count")),
+                biggestWin = cursor.getInt(cursor.getColumnIndexOrThrow("biggest_win")),
+                createdAt = cursor.getString(cursor.getColumnIndexOrThrow("created_at"))
+            )
+            history.add(gameHistory)
+        }
