@@ -594,6 +594,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         )
     }
 
+    private fun saveDailyResultIfNeeded() {
+        if (!gameHistoryManager.isTodaySaved()) {
+            val success = gameHistoryManager.saveDailyResult(
+                finalBalance = balance,
+                spinsCount = spinsCount,
+                biggestWin = biggestWin
+            )
+
+            if (success) {
+                Toast.makeText(this, "Wynik dnia zapisany!", Toast.LENGTH_SHORT).show()
+                // Resetuj liczniki na nowy dzień
+                spinsCount = 0
+                biggestWin = 0
+            }
+        }
+    }
+
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     override fun onRequestPermissionsResult(
