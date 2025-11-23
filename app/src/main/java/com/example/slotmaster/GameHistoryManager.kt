@@ -55,3 +55,15 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
         db.close()
         return history
     }
+fun isTodaySaved(): Boolean {
+        val db = dbHelper.readableDatabase
+        val query = "SELECT COUNT(*) FROM $TABLE_HISTORY WHERE game_date = ?"
+        val cursor = db.rawQuery(query, arrayOf(getCurrentDate()))
+
+        cursor.moveToFirst()
+        val count = cursor.getInt(0)
+
+        cursor.close()
+        db.close()
+        return count > 0
+    }
