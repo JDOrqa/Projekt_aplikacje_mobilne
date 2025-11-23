@@ -67,3 +67,9 @@ fun isTodaySaved(): Boolean {
         db.close()
         return count > 0
     }
+fun deleteTodaysRecord(): Boolean {
+        val db = dbHelper.writableDatabase
+        val result = db.delete(TABLE_HISTORY, "game_date = ?", arrayOf(getCurrentDate()))
+        db.close()
+        return result > 0
+    }
