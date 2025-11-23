@@ -11,3 +11,10 @@ class GameHistoryManager(private val dbHelper: GameHistoryHelper) {
     companion object {
         private const val TABLE_HISTORY = "game_history"
     }
+ private fun getCurrentDate(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    }
+
+    private fun getCurrentDateTime(): String {
+        return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+    }
