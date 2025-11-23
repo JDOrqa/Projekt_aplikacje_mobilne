@@ -73,3 +73,10 @@ fun deleteTodaysRecord(): Boolean {
         db.close()
         return result > 0
     }
+fun clearAllHistory(): Boolean {
+        val db = dbHelper.writableDatabase  // 👈 TERAZ dbHelper JEST DOSTĘPNE
+        val result = db.delete(TABLE_HISTORY, null, null)
+        db.close()
+        return result > 0
+    }
+}
