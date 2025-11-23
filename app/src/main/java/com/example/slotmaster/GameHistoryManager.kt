@@ -27,3 +27,7 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
             put("biggest_win", biggestWin)
             put("created_at", getCurrentDateTime())
         }
+ val result = db.insert(TABLE_HISTORY, null, values)
+        db.close()
+        return result != -1L
+    }
