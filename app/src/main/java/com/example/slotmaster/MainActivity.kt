@@ -72,13 +72,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         R.drawable.bell to 10
     )
 
-    // NOWE: Linie wygrywajÄce (indeksy slotĂłw)
+    // NOWE: Linie wygrywające (indeksy slotów)
     private val winningLines = listOf(
-        listOf(0, 1, 2),  // Linia 1 - gĂłrny wiersz
-        listOf(3, 4, 5),  // Linia 2 - Ĺrodkowy wiersz
+        listOf(0, 1, 2),  // Linia 1 - górny wiersz
+        listOf(3, 4, 5),  // Linia 2 - środkowy wiersz
         listOf(6, 7, 8),  // Linia 3 - dolny wiersz
-        listOf(0, 4, 8),  // Linia 4 - przekÄtna \
-        listOf(2, 4, 6)   // Linia 5 - przekÄtna /
+        listOf(0, 4, 8),  // Linia 4 - przekątna \
+        listOf(2, 4, 6)   // Linia 5 - przekątna /
     )
 
     private val targetLocations = listOf(
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ZAĹADUJ ZAPISANY MOTYW NA SAMYM POCZÄTKU
+        // ZAŁADUJ ZAPISANY MOTYW NA SAMYM POCZĄTKU
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val darkMode = prefs.getBoolean(KEY_DARK_MODE, false)
         AppCompatDelegate.setDefaultNightMode(
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         slot8 = binding.slot8
         slot9 = binding.slot9
 
-        // ZaĹaduj zapisany stan gry PRZED inicjalizacjÄ UI
+        // Załaduj zapisany stan gry PRZED inicjalizacją UI
         loadGameState()
 
         initializeSensors()
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
         }
 
-        // Czujnik ĹwiatĹa
+        // Czujnik światła
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         if (lightSensor != null) {
             sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     updateUI()
                     Toast.makeText(
                         this,
-                        "Zdobyto 100 punktĂłw za odwiedzenie lokalizacji nr${index + 1}!",
+                        "Zdobyto 100 punktów za odwiedzenie lokalizacji nr${index + 1}!",
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -227,7 +227,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             resetGame()
         }
 
-        // Listenery dla checkboxĂłw linii
+        // Listenery dla checkboxów linii
         getLineCheckboxesList().forEach { checkbox ->
             checkbox.setOnCheckedChangeListener { _, _ ->
                 updateSelectedLines()
@@ -265,7 +265,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private fun updateBetInfo() {
         val totalBet = baseBet * selectedLines
-        binding.tvBetInfo.text = "Stawka: $totalBet punktĂłw ($selectedLines linii)"
+        binding.tvBetInfo.text = "Stawka: $totalBet punktów ($selectedLines linii)"
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
@@ -306,25 +306,25 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                     getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                         .edit().putBoolean(KEY_DARK_MODE, true).apply()
-                    binding.tvLightInfo.text = "đ Tryb: CIEMNY (${"%.1f".format(lightValue)} lux)"
+                    binding.tvLightInfo.text = "🌙 Tryb: CIEMNY (${"%.1f".format(lightValue)} lux)"
                 }
             } else {
                 if (AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_NO) {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                     getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                         .edit().putBoolean(KEY_DARK_MODE, false).apply()
-                    binding.tvLightInfo.text = "âď¸ Tryb: JASNY (${"%.1f".format(lightValue)} lux)"
+                    binding.tvLightInfo.text = "☀️ Tryb: JASNY (${"%.1f".format(lightValue)} lux)"
                 }
             }
         }
     }
 
-    // NOWA ANIMACJA KRÄCENIA
+    // NOWA ANIMACJA KRĘCENIA
     private fun spinSlots() {
         val totalBet = baseBet * selectedLines
 
         if (balance < totalBet) {
-            Toast.makeText(this, "Za maĹo punktĂłw!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Za mało punktów!", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -343,7 +343,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             slot.alpha = 1.0f
         }
 
-        // Faza 1: Szybkie krÄcenie z efektem rozmycia
+        // Faza 1: Szybkie kręcenie z efektem rozmycia
         applySpinEffects(slots)
 
         var fastSpinCount = 0
@@ -407,7 +407,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         slot.scaleY = 1.0f
                         slot.rotationY = 0f
                     } else {
-                        // Nadal krÄÄ
+                        // Nadal kręć
                         val randomSymbol = symbols.random()
                         slot.setImageResource(randomSymbol)
                         slot.rotationY = slot.rotationY + 20f
@@ -465,7 +465,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         Toast.LENGTH_SHORT
                     ).show()
 
-                    // PodĹwietl wygranÄ liniÄ
+                    // Podświetl wygraną linię
                     highlightWinningLine(line)
                 }
             }
@@ -476,7 +476,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             saveGameState()
             Toast.makeText(
                 this,
-                "Wygrana: $totalWin punktĂłw!",
+                "Wygrana: $totalWin punktów!",
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -489,10 +489,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lineIndices.forEach { index ->
             val slot = slots[index]
 
-            // Zachowaj oryginalne tĹo z borderem
+            // Zachowaj oryginalne tło z borderem
             val originalBackground = slot.background
 
-            // Animacja powiÄkszenia
+            // Animacja powiększenia
             slot.animate()
                 .scaleX(1.2f)
                 .scaleY(1.2f)
@@ -506,11 +506,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 }
                 .start()
 
-            // Efekt migania - UĹťYJ PRZEZROCZYSTEGO KOLORU zamiast zmieniaÄ tĹo
+            // Efekt migania - UŻYJ PRZEZROCZYSTEGO KOLORU zamiast zmieniać tło
             ObjectAnimator.ofArgb(
                 slot,
                 "backgroundColor",
-                ContextCompat.getColor(this, R.color.neon_green_transparent), // UĹźyj przezroczystego koloru
+                ContextCompat.getColor(this, R.color.neon_green_transparent), // Użyj przezroczystego koloru
                 ContextCompat.getColor(this, android.R.color.transparent)
             ).apply {
                 duration = 500
@@ -518,10 +518,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 start()
             }
 
-            // PrzywrĂłÄ oryginalne tĹo po animacji
+            // Przywróć oryginalne tło po animacji
             handler.postDelayed({
                 slot.background = originalBackground
-            }, 1500) // Po zakoĹczeniu wszystkich animacji
+            }, 1500) // Po zakończeniu wszystkich animacji
         }
     }
 
@@ -578,121 +578,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         selectedLines = prefs.getInt("selectedLines", 1)
         getLineCheckboxesList().forEachIndexed { index, checkbox ->
             checkbox.isChecked = prefs.getBoolean("line${index+1}_checked", index == 0)
-        }
-    }
-
-    private fun updateDailyResultInDatabase() {
-        if (gameHistoryManager.isTodaySaved()) {
-            // Jeśli już zapisano dzisiaj - USUŃ stary wpis
-            gameHistoryManager.deleteTodaysRecord()
-        }
-        // ZAPISZ nowy wpis z aktualnymi danymi
-        gameHistoryManager.saveDailyResult(
-            finalBalance = balance,
-            spinsCount = spinsCount,
-            biggestWin = biggestWin
-        )
-    }
-
-    private fun saveDailyResultIfNeeded() {
-        if (!gameHistoryManager.isTodaySaved()) {
-            val success = gameHistoryManager.saveDailyResult(
-                finalBalance = balance,
-                spinsCount = spinsCount,
-                biggestWin = biggestWin
-            )
-
-            if (success) {
-                Toast.makeText(this, "Wynik dnia zapisany!", Toast.LENGTH_SHORT).show()
-                // Resetuj liczniki na nowy dzień
-                spinsCount = 0
-                biggestWin = 0
-            }
-        }
-    }
-
-    // Sprawdza czy trzeba zapisać poprzedni dzień (przy starcie aplikacji)
-    private fun checkAndSavePreviousDay() {
-        // Możesz dodać logikę sprawdzania czy minął dzień
-        // Na razie po prostu sprawdza czy dzisiaj już zapisano
-        saveDailyResultIfNeeded()
-    }
-
-    // Pokazuje historię wyników (możesz podpiąć pod nowy przycisk)
-    private fun showHistory() {
-        val history = gameHistoryManager.getRecentHistory(7)
-
-        if (history.isEmpty()) {
-            android.app.AlertDialog.Builder(this)
-                .setTitle("📊 Historia Gier")
-                .setMessage("Brak zapisanych wyników z ostatnich 7 dni.\n\nGraj dalej, a wyniki pojawią się tutaj! 🎰")
-                .setPositiveButton("OK", null)
-                .show()
-            return
-        }
-
-        val historyText = history.joinToString("\n\n") { record ->
-            "📅 ${formatDisplayDate(record.gameDate)}\n" +
-                    "💰 Saldo: ${record.finalBalance} punktów\n" +
-                    "🎰 Spiny: ${record.spinsCount}\n" +
-                    "🏆 Największa wygrana: ${record.biggestWin}\n" +
-                    "⏰ Godzina: ${formatTime(record.createdAt)}"
-        }
-
-        android.app.AlertDialog.Builder(this)
-            .setTitle("📊 Historia 7 dni")
-            .setMessage(historyText)
-            .setPositiveButton("OK", null)
-            .setNeutralButton("Wyczyść historię") { dialog, _ ->
-                showClearHistoryConfirmation()
-                dialog.dismiss()
-            }
-            .show()
-    }
-
-
-    private fun formatDisplayDate(dbDate: String): String {
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-            val date = inputFormat.parse(dbDate)
-            outputFormat.format(date ?: Date())
-        } catch (e: Exception) {
-            dbDate
-        }
-    }
-
-    private fun formatTime(dateTime: String): String {
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val date = inputFormat.parse(dateTime)
-            outputFormat.format(date ?: Date())
-        } catch (e: Exception) {
-            ""
-        }
-    }
-
-    private fun showClearHistoryConfirmation() {
-        android.app.AlertDialog.Builder(this)
-            .setTitle("🧹 Wyczyść historię")
-            .setMessage("Czy na pewno chcesz usunąć całą historię gier? Tej operacji nie można cofnąć.")
-            .setPositiveButton("TAK, wyczyść") { dialog, _ ->
-                clearAllHistory()
-                dialog.dismiss()
-            }
-            .setNegativeButton("NIE, zachowaj", null)
-            .show()
-    }
-
-    private fun clearAllHistory() {
-
-        val success = gameHistoryManager.clearAllHistory()
-
-        if (success) {
-            Toast.makeText(this, "Historia wyczyszczona!", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Błąd podczas czyszczenia historii", Toast.LENGTH_SHORT).show()
         }
     }
 

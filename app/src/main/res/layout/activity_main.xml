@@ -5,24 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:background="?android:attr/colorBackground"
     tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center"
-        android:background="?android:attr/colorBackground">
+        android:gravity="center">
 
-        <!-- Tytuł -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SLOT MASTER"
+            android:text="@string/slot_master_title"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="?android:attr/colorAccent"
+            android:textColor="@color/primary"
             android:layout_marginBottom="32dp" />
 
         <!-- Wyświetlacz salda -->
@@ -30,85 +27,256 @@
             android:id="@+id/tvBalance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Saldo: 1000"
+            android:text="@string/balance"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="?android:attr/colorAccent"
             android:layout_marginBottom="24dp" />
 
-        <!-- Sloty -->
+        <!-- Siatka slotów 3x3 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginBottom="32dp">
+            android:layout_marginBottom="24dp">
 
-            <ImageView
-                android:id="@+id/slot1"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@drawable/slot_border_dark"
-                android:scaleType="centerInside"
-                android:padding="8dp"
-                android:layout_margin="8dp"
-                android:src="@drawable/cherry" />
+            <!-- Pierwszy wiersz -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
 
-            <ImageView
-                android:id="@+id/slot2"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@drawable/slot_border_dark"
-                android:scaleType="centerInside"
-                android:padding="8dp"
-                android:layout_margin="8dp"
-                android:src="@drawable/cherry" />
+                <ImageView
+                    android:id="@+id/slot1"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
 
-            <ImageView
-                android:id="@+id/slot3"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@drawable/slot_border_dark"
-                android:scaleType="centerInside"
-                android:padding="8dp"
-                android:layout_margin="8dp"
-                android:src="@drawable/cherry" />
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+
+                <ImageView
+                    android:id="@+id/slot2"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+
+                <ImageView
+                    android:id="@+id/slot3"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+            </LinearLayout>
+
+            <!-- Drugi wiersz -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/slot4"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+
+                <ImageView
+                    android:id="@+id/slot5"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+
+                <ImageView
+                    android:id="@+id/slot6"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+            </LinearLayout>
+
+            <!-- Trzeci wiersz -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/slot7"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+
+                <ImageView
+                    android:id="@+id/slot8"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+
+                <ImageView
+                    android:id="@+id/slot9"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:gravity="center"
+
+                    android:textSize="30sp"
+                    android:background="@drawable/slot_border"
+                    android:layout_margin="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Wybór linii -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/choose_lines"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Kontener linii z zawijaniem -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <!-- Pierwszy wiersz linii -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="8dp">
+
+                <CheckBox
+                    android:id="@+id/cbLine1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/line_1"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:checked="true" />
+
+                <CheckBox
+                    android:id="@+id/cbLine2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/line_2"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:layout_marginStart="16dp" />
+
+                <CheckBox
+                    android:id="@+id/cbLine3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/line_3"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:layout_marginStart="16dp" />
+
+            </LinearLayout>
+
+            <!-- Drugi wiersz linii -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <CheckBox
+                    android:id="@+id/cbLine4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/line_4"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:padding="12dp" />
+
+                <CheckBox
+                    android:id="@+id/cbLine5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/line_5"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:padding="12dp"
+                    android:layout_marginStart="16dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Przyciski akcji -->
+        <!-- Informacje o stawce -->
+        <TextView
+            android:id="@+id/tvBetInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bet_info"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Przyciski -->
         <Button
             android:id="@+id/btnSpin"
             android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="SPIN (10 punktów)"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:backgroundTint="?android:attr/colorAccent"
-            android:layout_marginBottom="16dp" />
-
-
+            android:layout_height="60dp"
+            android:text="@string/spin"
+            android:textSize="17sp"
+            android:layout_marginBottom="4dp"
+            style="@style/Widget.Material3.Button" />
 
         <Button
             android:id="@+id/btnReset"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:text="Reset Gry"
+            android:text="@string/reset_game"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="?android:attr/textColorPrimary"
-            android:backgroundTint="?android:attr/colorBackgroundFloating"
-            android:layout_marginBottom="32dp" />
+            android:layout_marginBottom="32dp"
+            style="@style/Widget.Material3.Button.OutlinedButton" />
 
         <!-- Sekcja informacji o czujnikach -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
+            app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="?android:attr/colorBackgroundFloating"
             app:cardUseCompatPadding="true">
 
             <LinearLayout
@@ -120,19 +288,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Informacje o czujnikach"
+                    android:text="@string/sensor_info"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Akcelerometr -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Akcelerometr: Potrząśnij aby zakręcić"
+                    android:text="@string/accelerometer_info"
                     android:textSize="14sp"
-                    android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginBottom="8dp" />
 
                 <!-- Czujnik światła -->
@@ -140,9 +306,8 @@
                     android:id="@+id/tvLightInfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Tryb: AUTO"
+                    android:text="@string/light_info"
                     android:textSize="14sp"
-                    android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginBottom="8dp" />
 
                 <!-- GPS -->
@@ -150,22 +315,19 @@
                     android:id="@+id/tvLocationInfo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Odwiedzone lokacje: 0/3"
-                    android:textSize="14sp"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:text="@string/location_info"
+                    android:textSize="14sp" />
 
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
 
         <!-- Instrukcje -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="?android:attr/colorBackgroundFloating"
-            app:cardUseCompatPadding="true">
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -176,41 +338,33 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Instrukcje"
+                    android:text="@string/instructions"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Potrząśnij telefonem aby zakręcić"
-                    android:textSize="12sp"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:text="@string/instruction_shake"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Zmień oświetlenie aby przełączyć tryb jasny/ciemny"
-                    android:textSize="12sp"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:text="@string/instruction_light"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Odwiedź specjalne lokalizacje aby zdobyć 100 punktów"
-                    android:textSize="12sp"
-                    android:textColor="?android:attr/textColorSecondary" />
-
-
+                    android:text="@string/instruction_location"
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-
-    
 
 </ScrollView>
