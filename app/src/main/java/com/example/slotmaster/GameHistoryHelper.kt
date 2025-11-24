@@ -12,6 +12,10 @@ class GameHistoryHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
         private const val TABLE_HISTORY = "game_history"
 
         private const val COLUMN_ID = "id"
+        private const val COLUMN_GAME_DATE = "game_date"
+        private const val COLUMN_FINAL_BALANCE = "final_balance"
+        private const val COLUMN_SPINS_COUNT = "spins_count"
+        private const val COLUMN_BIGGEST_WIN = "biggest_win"
         private const val COLUMN_CREATED_AT = "created_at"
     }
 
@@ -19,6 +23,10 @@ class GameHistoryHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_N
         val createTable = """
             CREATE TABLE $TABLE_HISTORY (
                 $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_GAME_DATE TEXT NOT NULL,
+                $COLUMN_FINAL_BALANCE INTEGER NOT NULL,
+                $COLUMN_SPINS_COUNT INTEGER NOT NULL,
+                $COLUMN_BIGGEST_WIN INTEGER NOT NULL,
                 $COLUMN_CREATED_AT TEXT NOT NULL
             )
         """.trimIndent()
