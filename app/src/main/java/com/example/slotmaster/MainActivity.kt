@@ -136,9 +136,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         if (lightSensor != null) {
             sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
-            binding.tvLightInfo.text = "Czujnik światła: AKTYWNY"
+            binding.tvLightInfo.text = "Czujnik ĹwiatĹa: AKTYWNY"
         } else {
-            binding.tvLightInfo.text = "Czujnik światła: NIE DOSTĘPNY"
+            binding.tvLightInfo.text = "Czujnik ĹwiatĹa: NIE DOSTÄPNY"
         }
     }
 
