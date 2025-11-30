@@ -97,3 +97,40 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
+    suspend fun getUsers(): List<User> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "👥 Pobieram listę userów")
+
+                val request = Request.Builder()
+                    .url("$baseUrl/users")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                Log.d(TAG, "Kod odpowiedzi userów: ${response.code}")
+
+                if (!response.isSuccessful) return@withContext emptyList()
+
+                val jsonArray = JSONArray(responseBody ?: "[]")
+                val users = mutableListOf<User>()
+
+                for (i in 0 until jsonArray.length()) {
+                    val jsonObject = jsonArray.getJSONObject(i)
+                    users.add(User(
+                        userId = jsonObject.optString("user_id", ""),
+                        userName = extractUserName(jsonObject.optString("user_id", "")),
+                        lastActivity = jsonObject.optString("last_activity", ""),
+                        balance = jsonObject.optInt("balance", 0)
+                    ))
+                }
+
+                Log.d(TAG, "Pobrano ${users.size} userów")
+                users
+            } catch (e: Exception) {
+                Log.e(TAG, "Błąd pobierania userów: ${e.message}")
+                emptyList()
+            }
+        }
+    }
