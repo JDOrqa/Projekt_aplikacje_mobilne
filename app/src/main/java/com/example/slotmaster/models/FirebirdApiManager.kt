@@ -134,3 +134,41 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
+// Utwórz nowego usera
+    suspend fun createUser(userName: String): String {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "🆕 Tworzę nowego usera: $userName")
+
+                val json = JSONObject().apply {
+                    put("userName", userName)
+                }
+
+                val request = Request.Builder()
+                    .url("$baseUrl/users")
+                    .post(json.toString().toRequestBody("application/json".toMediaType()))
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                Log.d(TAG, "Kod odpowiedzi tworzenia usera: ${response.code}")
+                Log.d(TAG, "Odpowiedź tworzenia usera: $responseBody")
+
+                if (response.isSuccessful) {
+                    val jsonResponse = JSONObject(responseBody ?: "{}")
+                    val newUserId = jsonResponse.optString("userId", "")
+                    if (newUserId.isNotEmpty()) {
+                        setUserId(newUserId)
+                        return@withContext newUserId
+                    }
+                }
+
+                // Fallback
+                getUserId()
+            } catch (e: Exception) {
+                Log.e(TAG, "Błąd tworzenia usera: ${e.message}")
+                getUserId()
+            }
+        }
+    }
