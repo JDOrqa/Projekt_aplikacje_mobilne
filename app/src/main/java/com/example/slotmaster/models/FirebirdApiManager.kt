@@ -11,3 +11,12 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
+class FirebirdApiManager(private val context: Context) {
+
+    private val client = OkHttpClient()
+    private val baseUrl = "https://tangy-ducks-judge.loca.lt/api"
+
+    companion object {
+        private const val TAG = "FirebirdApiManager"
+    }
+    
