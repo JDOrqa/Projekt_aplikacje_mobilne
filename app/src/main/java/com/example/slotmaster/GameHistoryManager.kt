@@ -1,3 +1,4 @@
+
 package com.example.slotmaster
 
 import android.content.ContentValues
@@ -5,20 +6,24 @@ import android.database.sqlite.SQLiteDatabase
 import com.example.slotmaster.models.GameHistory
 import java.text.SimpleDateFormat
 import java.util.*
+
 class GameHistoryManager(private val dbHelper: GameHistoryHelper) {
 
 
     companion object {
         private const val TABLE_HISTORY = "game_history"
     }
- private fun getCurrentDate(): String {
+
+
+    private fun getCurrentDate(): String {
         return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     }
 
     private fun getCurrentDateTime(): String {
         return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
     }
-fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolean {
+
+    fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolean {
         val db = dbHelper.writableDatabase
         val values = ContentValues().apply {
             put("game_date", getCurrentDate())
@@ -27,19 +32,24 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
             put("biggest_win", biggestWin)
             put("created_at", getCurrentDateTime())
         }
- val result = db.insert(TABLE_HISTORY, null, values)
+
+        val result = db.insert(TABLE_HISTORY, null, values)
         db.close()
         return result != -1L
     }
+
     fun getRecentHistory(days: Int = 7): List<GameHistory> {
         val history = mutableListOf<GameHistory>()
         val db = dbHelper.readableDatabase
-         val query = """
+
+        val query = """
             SELECT * FROM $TABLE_HISTORY 
             WHERE game_date >= date('now', '-$days days') 
             ORDER BY game_date DESC
         """.trimIndent()
+
         val cursor = db.rawQuery(query, null)
+
         while (cursor.moveToNext()) {
             val gameHistory = GameHistory(
                 id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
@@ -51,11 +61,13 @@ fun saveDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolea
             )
             history.add(gameHistory)
         }
- cursor.close()
+
+        cursor.close()
         db.close()
         return history
     }
-fun isTodaySaved(): Boolean {
+
+    fun isTodaySaved(): Boolean {
         val db = dbHelper.readableDatabase
         val query = "SELECT COUNT(*) FROM $TABLE_HISTORY WHERE game_date = ?"
         val cursor = db.rawQuery(query, arrayOf(getCurrentDate()))
@@ -67,14 +79,17 @@ fun isTodaySaved(): Boolean {
         db.close()
         return count > 0
     }
-fun deleteTodaysRecord(): Boolean {
+
+
+    fun deleteTodaysRecord(): Boolean {
         val db = dbHelper.writableDatabase
         val result = db.delete(TABLE_HISTORY, "game_date = ?", arrayOf(getCurrentDate()))
         db.close()
         return result > 0
     }
-fun clearAllHistory(): Boolean {
-        val db = dbHelper.writableDatabase  
+
+    fun clearAllHistory(): Boolean {
+        val db = dbHelper.writableDatabase  // 👈 TERAZ dbHelper JEST DOSTĘPNE
         val result = db.delete(TABLE_HISTORY, null, null)
         db.close()
         return result > 0
