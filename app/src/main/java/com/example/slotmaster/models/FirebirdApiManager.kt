@@ -41,3 +41,27 @@ class FirebirdApiManager(private val context: Context) {
 
         return userId
     }
+    // 🔽 DODAJĘ TEST CONNECTION
+    suspend fun testConnection(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "🧪 TESTUJĘ POŁĄCZENIE: $baseUrl/status")
+
+                val request = Request.Builder()
+                    .url("$baseUrl/status")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                Log.d(TAG, "📡 KOD ODPOWIEDZI: ${response.code}")
+                Log.d(TAG, "📨 ODPOWIEDŹ: $responseBody")
+
+                response.isSuccessful
+            } catch (e: Exception) {
+                Log.e(TAG, "💥 BŁĄD POŁĄCZENIA: ${e.message}")
+                false
+            }
+        }
+    }
+    
