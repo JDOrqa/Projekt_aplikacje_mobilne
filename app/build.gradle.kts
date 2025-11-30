@@ -52,4 +52,19 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+
+    // OpenStreetMap - POPRAWIONE
+    implementation("org.osmdroid:osmdroid-android:6.1.17")
+// ZAMIOST osmbonuspack używamy prostszych rozwiązań:
+    implementation("com.github.MKergall:osmbonuspack:6.6.0")
+// Starsza, stabilna wersja
+// LUB alternatywnie:
+// implementation 'io.github.opensource-osmdroid:osmdroid-android:6.1.17'
+// Dla lepszej kompatybilności dodaj też:
+    implementation("androidx.preference:preference-ktx:1.2.1")
+
+    // JSON
+    implementation("org.json:json:20231013")
 }

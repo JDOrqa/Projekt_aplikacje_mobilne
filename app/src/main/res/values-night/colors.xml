@@ -2,4 +2,10 @@
 <resources>
     <color name="primary">#FFBB86FC</color>
     <color name="primary_dark">#FF3700B3</color>
+    <color name="neon_green">#00FF00</color>
+    <color name="neon_purple">#FF00FF</color>
+    <color name="neon_blue">#0080FF</color>
+    <color name="transparent">#00000000</color>
+    <color name="neon_green_transparent">#3300FF00</color>
+    <color name="gray">#757575</color>
 </resources>
