@@ -172,3 +172,61 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
+     // Pomocnicza funkcja do wyodrębniania nazwy z userId
+    private fun extractUserName(userId: String): String {
+        return if (userId.startsWith("user_") && userId.contains("_")) {
+            val parts = userId.split("_")
+            if (parts.size >= 2) {
+                parts[1].replace("_", " ").capitalizeWords()
+            } else {
+                userId
+            }
+        } else {
+            userId
+        }
+    }
+
+    // Rozszerzenie String do capitalizacji
+    private fun String.capitalizeWords(): String =
+        split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+
+    suspend fun saveGameStateToServer(
+        balance: Int,
+        spinsCount: Int,
+        biggestWin: Int,
+        visitedLocations: List<Boolean>,
+        selectedLines: Int,
+        lastShakeTime: Long
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val userId = getUserId()
+                val json = JSONObject().apply {
+                    put("userId", userId)
+                    put("balance", balance)
+                    put("spinsCount", spinsCount)
+                    put("biggestWin", biggestWin)
+                    put("visitedLocations", JSONArray(visitedLocations))
+                    put("selectedLines", selectedLines)
+                    put("lastShakeTime", lastShakeTime)
+                }
+
+                Log.d(TAG, "💾 Synchronizuję stan gry: $json")
+
+                val request = Request.Builder()
+                    .url("$baseUrl/game-state")
+                    .post(json.toString().toRequestBody("application/json".toMediaType()))
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                Log.d(TAG, "Kod odpowiedzi synchronizacji: ${response.code}")
+
+                response.isSuccessful
+            } catch (e: Exception) {
+                Log.e(TAG, "Błąd synchronizacji stanu gry: ${e.message}")
+                false
+            }
+        }
+    }
