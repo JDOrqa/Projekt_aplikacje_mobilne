@@ -64,4 +64,36 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
-    
+    suspend fun getSharedUserId(): String {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "🔗 Pobieram wspólne userId z serwera")
+
+                val request = Request.Builder()
+                    .url("$baseUrl/shared-user-id")
+                    .build()
+
+                val response = client.newCall(request).execute()
+                val responseBody = response.body?.string()
+
+                Log.d(TAG, "Kod odpowiedzi userId: ${response.code}")
+                Log.d(TAG, "Odpowiedź userId: $responseBody")
+
+                if (response.isSuccessful) {
+                    val jsonResponse = JSONObject(responseBody ?: "{}")
+                    val sharedUserId = jsonResponse.optString("userId", "")
+                    if (sharedUserId.isNotEmpty()) {
+                        Log.d(TAG, "✅ Ustawiam wspólne userId: $sharedUserId")
+                        setUserId(sharedUserId)
+                        return@withContext sharedUserId
+                    }
+                }
+
+                // Fallback: użyj lokalnego userId
+                getUserId()
+            } catch (e: Exception) {
+                Log.e(TAG, "Błąd pobierania userId: ${e.message}")
+                getUserId()
+            }
+        }
+    }
