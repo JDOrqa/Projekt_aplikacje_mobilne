@@ -1,3 +1,32 @@
 <resources>
-    <string name="app_name">SlotMaster</string>
+    <string name="app_name">Slot Master</string>
+    <string name="slot_master_title">SLOT MASTER</string>
+    <string name="balance">Saldo: %1$d</string>
+    <string name="spin">SPIN</string>
+    <string name="reset_game">Reset Gry</string>
+    <string name="choose_lines">Wybierz linie:</string>
+    <string name="line">Linia %1$d</string>
+    <string name="bet_info">Stawka: %1$d punktów (%2$d linii)</string>
+    <string name="sensor_info">Informacje o czujnikach</string>
+    <string name="accelerometer_info">Akcelerometr: Potrząśnij aby zakręcić</string>
+    <string name="light_info">Tryb: Jasny</string>
+    <string name="location_info">Odwiedzone lokacje: 0/3</string>
+    <string name="instructions">Instrukcje</string>
+    <string name="instruction_shake">• Potrząśnij telefonem aby zakręcić</string>
+    <string name="instruction_light">• Zmień oświetlenie aby przełączyć tryb jasny/ciemny</string>
+    <string name="instruction_location">• Odwiedź specjalne lokalizacje aby zdobyć 100 punktów</string>
+    <string name="light_sensor_unavailable">Czujnik światła niedostępny</string>
+    <string name="waiting_for_sensor">Oczekiwanie na dane z czujnika...</string>
+    <string name="dark_mode">Tryb: Ciemny (%1$.1f lux)</string>
+    <string name="light_mode">Tryb: Jasny (%1$.1f lux)</string>
+    <string name="insufficient_funds">Niewystarczające środki!</string>
+    <string name="winning_line">Wygrana linia %1$d! +%2$d</string>
+    <string name="total_win">Wygrana: %1$d punktów!</string>
+    <string name="no_win">Brak wygranej. Spróbuj ponownie!</string>
+    <string name="game_reset">Gra zresetowana!</string>
+    <string name="line_1">Linia 1</string>
+    <string name="line_2">Linia 2</string>
+    <string name="line_3">Linia 3</string>
+    <string name="line_4">Linia 4</string>
+    <string name="line_5">Linia 5</string>
 </resources>
