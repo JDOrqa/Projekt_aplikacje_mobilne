@@ -19,4 +19,25 @@ class FirebirdApiManager(private val context: Context) {
     companion object {
         private const val TAG = "FirebirdApiManager"
     }
-    
+    fun getCurrentUserId(): String {
+        return getUserId()
+    }
+
+    // 🔽 PUBLICZNA METODA DO USTAWIANIA USER_ID
+    fun setUserId(userId: String) {
+        val prefs = context.getSharedPreferences("FirebirdPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("user_id", userId).apply()
+        Log.d(TAG, "💾 Zapisano nowe userId: $userId")
+    }
+    private fun getUserId(): String {
+        val prefs = context.getSharedPreferences("FirebirdPrefs", Context.MODE_PRIVATE)
+        var userId = prefs.getString("user_id", null)
+
+        if (userId == null) {
+            userId = "user_${UUID.randomUUID()}"
+            prefs.edit().putString("user_id", userId).apply()
+            Log.d(TAG, "Nowy user ID: $userId")
+        }
+
+        return userId
+    }
