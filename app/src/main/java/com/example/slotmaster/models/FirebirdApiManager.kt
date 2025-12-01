@@ -245,6 +245,9 @@ class FirebirdApiManager(private val context: Context) {
                 val response = client.newCall(request).execute()
                 val responseBody = response.body?.string()
 
+                Log.d(TAG, "Kod odpowiedzi ładowania stanu: ${response.code}")
+                Log.d(TAG, "Odpowiedź ładowania stanu: $responseBody")
+
                 null
             } catch (e: Exception) {
                 Log.e(TAG, "💥 BŁĄD ŁADOWANIA STANU GRY: ${e.message}")
