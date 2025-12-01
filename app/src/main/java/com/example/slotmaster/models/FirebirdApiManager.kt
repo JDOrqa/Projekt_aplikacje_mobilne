@@ -235,6 +235,9 @@ class FirebirdApiManager(private val context: Context) {
     suspend fun loadGameStateFromServer(): GameState? {
         return withContext(Dispatchers.IO) {
             try {
+                val userId = getUserId()
+                Log.d(TAG, "🔍 Ładuję stan gry z serwera dla: $userId")
+
                 null
             } catch (e: Exception) {
                 Log.e(TAG, "💥 BŁĄD ŁADOWANIA STANU GRY: ${e.message}")
