@@ -248,7 +248,13 @@ class FirebirdApiManager(private val context: Context) {
                 Log.d(TAG, "Kod odpowiedzi ładowania stanu: ${response.code}")
                 Log.d(TAG, "Odpowiedź ładowania stanu: $responseBody")
 
-                null
+                if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
+                    // Na razie tylko sygnalizujemy sukces
+                    return@withContext null
+                } else {
+                    Log.e(TAG, "❌ BŁĄD ODPOWIEDZI SERWERA: ${response.code} - $responseBody")
+                    return@withContext null
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "💥 BŁĄD ŁADOWANIA STANU GRY: ${e.message}")
                 null
