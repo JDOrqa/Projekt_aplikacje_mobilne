@@ -251,11 +251,11 @@ class FirebirdApiManager(private val context: Context) {
                 if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
                     val json = JSONObject(responseBody)
 
-                    // WALIDACJA - sprawdź czy serwer zwrócił prawidłowe dane
+                    // 🔽 WALIDACJA - sprawdź czy serwer zwrócił prawidłowe dane
                     if (!json.has("balance")) {
                         Log.e(TAG, "❌ SERWER NIE ZWRÓCIŁ STANU GRY - brak kluczowych pól")
                         Log.e(TAG, "❌ Dostępne pola: ${json.keys().asSequence().toList()}")
-                        return@withContext null
+                        return@withContext null // NIE zwracaj domyślnych wartości!
                     }
 
                     val visitedLocationsArray = json.optJSONArray("visitedLocations")
@@ -270,8 +270,9 @@ class FirebirdApiManager(private val context: Context) {
                         visitedLocations.addAll(listOf(false, false, false))
                     }
 
+                    // 🔽 UŻYJ getInt() zamiast optInt() dla pól obowiązkowych
                     val gameState = GameState(
-                        balance = json.optInt("balance", 0),
+                        balance = json.getInt("balance"), // 🔽 BRAK fallback value!
                         spinsCount = json.optInt("spinsCount", 0),
                         biggestWin = json.optInt("biggestWin", 0),
                         visitedLocations = visitedLocations,
@@ -285,7 +286,7 @@ class FirebirdApiManager(private val context: Context) {
                     return@withContext gameState
                 } else {
                     Log.e(TAG, "❌ BŁĄD ODPOWIEDZI SERWERA: ${response.code} - $responseBody")
-                    return@withContext null
+                    return@withContext null // Nie zwracaj nic przy błędzie HTTP
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "💥 BŁĄD ŁADOWANIA STANU GRY: ${e.message}")
@@ -293,6 +294,7 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
+
 
 
 
