@@ -233,5 +233,8 @@ class FirebirdApiManager(private val context: Context) {
 
     // Pobierz stan gry z serwera
     suspend fun loadGameStateFromServer(): GameState? {
-        return null
+        return withContext(Dispatchers.IO) {
+            null
+        }
     }
+
