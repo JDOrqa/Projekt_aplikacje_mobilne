@@ -238,6 +238,10 @@ class FirebirdApiManager(private val context: Context) {
                 val userId = getUserId()
                 Log.d(TAG, "🔍 Ładuję stan gry z serwera dla: $userId")
 
+                val request = Request.Builder()
+                    .url("$baseUrl/game-state/$userId")
+                    .build()
+
                 null
             } catch (e: Exception) {
                 Log.e(TAG, "💥 BŁĄD ŁADOWANIA STANU GRY: ${e.message}")
