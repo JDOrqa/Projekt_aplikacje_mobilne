@@ -251,6 +251,7 @@ class FirebirdApiManager(private val context: Context) {
                 if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
                     val json = JSONObject(responseBody)
 
+                    // WALIDACJA - sprawdź czy serwer zwrócił prawidłowe dane
                     if (!json.has("balance")) {
                         Log.e(TAG, "❌ SERWER NIE ZWRÓCIŁ STANU GRY - brak kluczowych pól")
                         Log.e(TAG, "❌ Dostępne pola: ${json.keys().asSequence().toList()}")
@@ -265,6 +266,7 @@ class FirebirdApiManager(private val context: Context) {
                             visitedLocations.add(visitedLocationsArray.getBoolean(i))
                         }
                     } else {
+                        // Domyślne wartości
                         visitedLocations.addAll(listOf(false, false, false))
                     }
 
@@ -291,5 +293,6 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
+
 
 
