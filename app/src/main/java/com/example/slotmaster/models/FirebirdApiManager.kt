@@ -279,8 +279,11 @@ class FirebirdApiManager(private val context: Context) {
                         lastShakeTime = json.optLong("lastShakeTime", 0)
                     )
 
-                    Log.d(TAG, "✅ ZAŁADOWANO STAN Z SERWERA: balance=${gameState.balance}, " +
-                            "spins=${gameState.spinsCount}, win=${gameState.biggestWin}")
+                    Log.d(
+                        TAG,
+                        "✅ ZAŁADOWANO STAN Z SERWERA: balance=${gameState.balance}, " +
+                                "spins=${gameState.spinsCount}, win=${gameState.biggestWin}"
+                    )
 
                     return@withContext gameState
                 } else {
