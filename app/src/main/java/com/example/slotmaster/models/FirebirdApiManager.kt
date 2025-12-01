@@ -250,6 +250,13 @@ class FirebirdApiManager(private val context: Context) {
 
                 if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
                     val json = JSONObject(responseBody)
+
+                    if (!json.has("balance")) {
+                        Log.e(TAG, "❌ SERWER NIE ZWRÓCIŁ STANU GRY - brak kluczowych pól")
+                        Log.e(TAG, "❌ Dostępne pola: ${json.keys().asSequence().toList()}")
+                        return@withContext null
+                    }
+
                     return@withContext null
                 } else {
                     Log.e(TAG, "❌ BŁĄD ODPOWIEDZI SERWERA: ${response.code} - $responseBody")
