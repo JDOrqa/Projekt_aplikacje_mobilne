@@ -264,9 +264,20 @@ class FirebirdApiManager(private val context: Context) {
                         for (i in 0 until visitedLocationsArray.length()) {
                             visitedLocations.add(visitedLocationsArray.getBoolean(i))
                         }
+                    } else {
+                        visitedLocations.addAll(listOf(false, false, false))
                     }
 
-                    return@withContext null
+                    val gameState = GameState(
+                        balance = json.optInt("balance", 0),
+                        spinsCount = json.optInt("spinsCount", 0),
+                        biggestWin = json.optInt("biggestWin", 0),
+                        visitedLocations = visitedLocations,
+                        selectedLines = json.optInt("selectedLines", 1),
+                        lastShakeTime = json.optLong("lastShakeTime", 0)
+                    )
+
+                    return@withContext gameState
                 } else {
                     Log.e(TAG, "❌ BŁĄD ODPOWIEDZI SERWERA: ${response.code} - $responseBody")
                     return@withContext null
@@ -277,3 +288,4 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
+
