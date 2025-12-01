@@ -266,7 +266,7 @@ class FirebirdApiManager(private val context: Context) {
                             visitedLocations.add(visitedLocationsArray.getBoolean(i))
                         }
                     } else {
-                        // Domyślne wartości
+                        // Domyślne wartości TYLKO gdy serwer zwrócił stan
                         visitedLocations.addAll(listOf(false, false, false))
                     }
 
@@ -293,6 +293,7 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
+
 
 
 
