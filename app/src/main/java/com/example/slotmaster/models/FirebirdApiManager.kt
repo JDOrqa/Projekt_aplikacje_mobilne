@@ -249,7 +249,7 @@ class FirebirdApiManager(private val context: Context) {
                 Log.d(TAG, "Odpowiedź ładowania stanu: $responseBody")
 
                 if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
-                    // Na razie tylko sygnalizujemy sukces
+                    val json = JSONObject(responseBody)
                     return@withContext null
                 } else {
                     Log.e(TAG, "❌ BŁĄD ODPOWIEDZI SERWERA: ${response.code} - $responseBody")
@@ -261,4 +261,3 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
-
