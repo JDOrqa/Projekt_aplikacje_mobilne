@@ -260,6 +260,12 @@ class FirebirdApiManager(private val context: Context) {
                     val visitedLocationsArray = json.optJSONArray("visitedLocations")
                     val visitedLocations = mutableListOf<Boolean>()
 
+                    if (visitedLocationsArray != null) {
+                        for (i in 0 until visitedLocationsArray.length()) {
+                            visitedLocations.add(visitedLocationsArray.getBoolean(i))
+                        }
+                    }
+
                     return@withContext null
                 } else {
                     Log.e(TAG, "❌ BŁĄD ODPOWIEDZI SERWERA: ${response.code} - $responseBody")
