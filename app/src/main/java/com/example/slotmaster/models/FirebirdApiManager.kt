@@ -234,7 +234,12 @@ class FirebirdApiManager(private val context: Context) {
     // Pobierz stan gry z serwera
     suspend fun loadGameStateFromServer(): GameState? {
         return withContext(Dispatchers.IO) {
-            null
+            try {
+                null
+            } catch (e: Exception) {
+                Log.e(TAG, "💥 BŁĄD ŁADOWANIA STANU GRY: ${e.message}")
+                null
+            }
         }
     }
 
