@@ -1199,6 +1199,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     .show()
             }
         }
+
+        handler.post(slowSpinRunnable)
     }
 
     private fun formatDisplayDate(dbDate: String): String {

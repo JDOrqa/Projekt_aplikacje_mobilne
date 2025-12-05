@@ -6,7 +6,5 @@ data class GameHistory(
     val finalBalance: Int,
     val spinsCount: Int,
     val biggestWin: Int,
-    val createdAt: String,
-    val userId: String = ""
-
+    val createdAt: String
 )

@@ -1,5 +1,4 @@
 package com.example.slotmaster
-
 import android.content.Context
 import android.util.Log
 import com.example.slotmaster.models.GameHistory
@@ -12,7 +11,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
-
 class FirebirdApiManager(private val context: Context) {
 
     private val client = OkHttpClient()
@@ -21,13 +19,11 @@ class FirebirdApiManager(private val context: Context) {
     companion object {
         private const val TAG = "FirebirdApiManager"
     }
-
-
     fun getCurrentUserId(): String {
         return getUserId()
     }
 
-    //  PUBLICZNA METODA DO USTAWIANIA USER_ID
+    // 🔽 PUBLICZNA METODA DO USTAWIANIA USER_ID
     fun setUserId(userId: String) {
         val prefs = context.getSharedPreferences("FirebirdPrefs", Context.MODE_PRIVATE)
         prefs.edit().putString("user_id", userId).apply()
@@ -45,7 +41,7 @@ class FirebirdApiManager(private val context: Context) {
 
         return userId
     }
-    //  DODAJĘ TEST CONNECTION
+    // 🔽 DODAJĘ TEST CONNECTION
     suspend fun testConnection(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
@@ -138,8 +134,7 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
-
-    // Utwórz nowego usera
+// Utwórz nowego usera
     suspend fun createUser(userName: String): String {
         return withContext(Dispatchers.IO) {
             try {
@@ -177,8 +172,7 @@ class FirebirdApiManager(private val context: Context) {
             }
         }
     }
-
-    // Pomocnicza funkcja do wyodrębniania nazwy z userId
+     // Pomocnicza funkcja do wyodrębniania nazwy z userId
     private fun extractUserName(userId: String): String {
         return if (userId.startsWith("user_") && userId.contains("_")) {
             val parts = userId.split("_")
@@ -285,8 +279,11 @@ class FirebirdApiManager(private val context: Context) {
                         lastShakeTime = json.optLong("lastShakeTime", 0)
                     )
 
-                    Log.d(TAG, "✅ ZAŁADOWANO STAN Z SERWERA: balance=${gameState.balance}, " +
-                            "spins=${gameState.spinsCount}, win=${gameState.biggestWin}")
+                    Log.d(
+                        TAG,
+                        "✅ ZAŁADOWANO STAN Z SERWERA: balance=${gameState.balance}, " +
+                                "spins=${gameState.spinsCount}, win=${gameState.biggestWin}"
+                    )
 
                     return@withContext gameState
                 } else {
@@ -303,271 +300,6 @@ class FirebirdApiManager(private val context: Context) {
 
 
 
-    private fun getCurrentDate(): String {
-        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-    }
 
-    private fun getCurrentDateTime(): String {
-        return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-    }
 
-    suspend fun saveDailyResult(finalBalance: Int, newSpinsCount: Int, biggestWin: Int): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val userId = getUserId()
-                val currentDate = getCurrentDate()
 
-                Log.d(TAG, "💾 Próbuję zapisać wynik: data=$currentDate, saldo=$finalBalance, NOWE spiny=$newSpinsCount, wygrana=$biggestWin")
-
-                // 1. Pobierz istniejący wpis na dzisiaj
-                val existingRecord = getTodaysRecord()
-
-                if (existingRecord != null) {
-                    // 2. Jeśli istnieje - aktualizuj z SUMOWANIEM tylko NOWYCH spinów
-                    Log.d(TAG, "🔄 Aktualizuję istniejący wpis: ${existingRecord.id}")
-
-                    val updatedSpinsCount = existingRecord.spinsCount + newSpinsCount
-                    val updatedBiggestWin = maxOf(existingRecord.biggestWin, biggestWin)
-
-                    Log.d(TAG, "📊 Nowe wartości: stare spiny=${existingRecord.spinsCount} + nowe=$newSpinsCount = $updatedSpinsCount, wygrana=$updatedBiggestWin")
-
-                    return@withContext updateDailyResult(
-                        finalBalance = finalBalance,
-                        spinsCount = updatedSpinsCount,
-                        biggestWin = updatedBiggestWin
-                    )
-                } else {
-                    // 3. Jeśli nie istnieje - użyj podanej liczby spinów (pierwszy zapis dnia)
-                    Log.d(TAG, "🆕 Tworzę nowy wpis na dzisiaj z spinami: $newSpinsCount")
-                    return@withContext createDailyResult(
-                        finalBalance = finalBalance,
-                        spinsCount = newSpinsCount,
-                        biggestWin = biggestWin
-                    )
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, "💥 Błąd zapisu: ${e.message}")
-                false
-            }
-        }
-    }
-
-    private suspend fun getTodaysRecord(): GameHistory? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val userId = getUserId()
-                val currentDate = getCurrentDate()
-
-                val request = Request.Builder()
-                    .url("$baseUrl/game-history/$userId/today")
-                    .build()
-
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
-
-                if (!response.isSuccessful) return@withContext null
-
-                val jsonArray = JSONArray(responseBody ?: "[]")
-                if (jsonArray.length() > 0) {
-                    val jsonObject = jsonArray.getJSONObject(0)
-                    return@withContext GameHistory(
-                        id = jsonObject.optInt("id", 0),
-                        gameDate = getField(jsonObject, "gameDate", "game_date"),
-                        finalBalance = jsonObject.optInt("finalBalance", jsonObject.optInt("final_balance", 0)),
-                        spinsCount = jsonObject.optInt("spinsCount", jsonObject.optInt("spins_count", 0)),
-                        biggestWin = jsonObject.optInt("biggestWin", jsonObject.optInt("biggest_win", 0)),
-                        createdAt = getField(jsonObject, "createdAt", "created_at"),
-                        userId = getField(jsonObject, "userId", "user_id")
-                    )
-                }
-                null
-            } catch (e: Exception) {
-                Log.e(TAG, "Błąd pobierania dzisiejszego wpisu: ${e.message}")
-                null
-            }
-        }
-    }
-
-    private suspend fun updateDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val userId = getUserId()
-                val currentDate = getCurrentDate()
-
-                val json = JSONObject().apply {
-                    put("userId", userId)
-                    put("gameDate", currentDate)
-                    put("finalBalance", finalBalance)
-                    put("spinsCount", spinsCount)
-                    put("biggestWin", biggestWin)
-                    put("createdAt", getCurrentDateTime())
-                }
-
-                Log.d(TAG, "🔄 Wysyłam aktualizację: $json")
-
-                val request = Request.Builder()
-                    .url("$baseUrl/game-history")
-                    .post(json.toString().toRequestBody("application/json".toMediaType()))
-                    .build()
-
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
-
-                Log.d(TAG, "Kod odpowiedzi aktualizacji: ${response.code}")
-                Log.d(TAG, "Odpowiedź aktualizacji: $responseBody")
-
-                response.isSuccessful
-            } catch (e: Exception) {
-                Log.e(TAG, "Błąd aktualizacji: ${e.message}")
-                false
-            }
-        }
-    }
-
-    // Nowa metoda: Utwórz nowy wpis
-    private suspend fun createDailyResult(finalBalance: Int, spinsCount: Int, biggestWin: Int): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val userId = getUserId()
-
-                val json = JSONObject().apply {
-                    put("userId", userId)
-                    put("gameDate", getCurrentDate())
-                    put("finalBalance", finalBalance)
-                    put("spinsCount", spinsCount)
-                    put("biggestWin", biggestWin)
-                    put("createdAt", getCurrentDateTime())
-                }
-
-                Log.d(TAG, "🆕 Wysyłam nowy wpis: $json")
-
-                val request = Request.Builder()
-                    .url("$baseUrl/game-history")
-                    .post(json.toString().toRequestBody("application/json".toMediaType()))
-                    .build()
-
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
-
-                Log.d(TAG, "Kod odpowiedzi nowego wpisu: ${response.code}")
-                Log.d(TAG, "Odpowiedź nowego wpisu: $responseBody")
-
-                response.isSuccessful
-            } catch (e: Exception) {
-                Log.e(TAG, "Błąd tworzenia nowego wpisu: ${e.message}")
-                false
-            }
-        }
-    }
-
-    suspend fun getRecentHistory(days: Int = 7): List<GameHistory> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val userId = getUserId()
-                Log.d(TAG, "Pobieram historię dla: $userId")
-
-                val request = Request.Builder()
-                    .url("$baseUrl/game-history/$userId")
-                    .build()
-
-                val response = client.newCall(request).execute()
-                val responseBody = response.body?.string()
-
-                Log.d(TAG, "Kod odpowiedzi: ${response.code}")
-                Log.d(TAG, "Odpowiedź: $responseBody")
-
-                if (!response.isSuccessful) return@withContext emptyList()
-
-                val jsonArray = JSONArray(responseBody ?: "[]")
-                val history = mutableListOf<GameHistory>()
-
-                for (i in 0 until jsonArray.length()) {
-                    val jsonObject = jsonArray.getJSONObject(i)
-
-                    // Loguj wszystkie pola dla debugu
-                    Log.d(TAG, "Otrzymane pola:")
-                    val keys = jsonObject.keys()
-                    while (keys.hasNext()) {
-                        val key = keys.next()
-                        Log.d(TAG, "  $key: ${jsonObject.get(key)}")
-                    }
-
-                    val gameHistory = GameHistory(
-                        id = jsonObject.optInt("id", 0),
-                        gameDate = getField(jsonObject, "gameDate", "game_date"),
-                        finalBalance = jsonObject.optInt("finalBalance", jsonObject.optInt("final_balance", 0)),
-                        spinsCount = jsonObject.optInt("spinsCount", jsonObject.optInt("spins_count", 0)),
-                        biggestWin = jsonObject.optInt("biggestWin", jsonObject.optInt("biggest_win", 0)),
-                        createdAt = getField(jsonObject, "createdAt", "created_at"),
-                        userId = getField(jsonObject, "userId", "user_id")
-                    )
-                    history.add(gameHistory)
-                    Log.d(TAG, "Utworzono GameHistory: $gameHistory")
-                }
-
-                Log.d(TAG, "Pobrano ${history.size} wpisów historii")
-                history
-            } catch (e: Exception) {
-                Log.e(TAG, "Błąd pobierania historii: ${e.message}")
-                emptyList()
-            }
-        }
-    }
-
-    private fun getField(jsonObject: JSONObject, primaryField: String, fallbackField: String): String {
-        return if (jsonObject.has(primaryField)) {
-            jsonObject.optString(primaryField, "")
-        } else {
-            jsonObject.optString(fallbackField, "")
-        }
-    }
-
-    suspend fun isTodaySaved(): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val history = getRecentHistory(1)
-                val today = getCurrentDate()
-                val exists = history.any { it.gameDate == today }
-                Log.d(TAG, "Dzisiejszy wpis istnieje: $exists")
-                exists
-            } catch (e: Exception) {
-                Log.e(TAG, "Błąd sprawdzania dzisiejszego zapisu: ${e.message}")
-                false
-            }
-        }
-    }
-
-    suspend fun deleteTodaysRecord(): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                saveDailyResult(0, 0, 0)
-            } catch (e: Exception) {
-                Log.e(TAG, "Błąd usuwania: ${e.message}")
-                false
-            }
-        }
-    }
-
-    suspend fun clearAllHistory(): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val userId = getUserId()
-                Log.d(TAG, "Usuwam historię dla: $userId")
-
-                val request = Request.Builder()
-                    .url("$baseUrl/game-history/$userId")
-                    .delete()
-                    .build()
-
-                val response = client.newCall(request).execute()
-                Log.d(TAG, "Kod odpowiedzi usuwania: ${response.code}")
-
-                response.isSuccessful
-            } catch (e: Exception) {
-                Log.e(TAG, "Błąd czyszczenia historii: ${e.message}")
-                false
-            }
-        }
-    }
-}
