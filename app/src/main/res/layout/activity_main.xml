@@ -1,551 +1,404 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <!-- Główna zawartość (ScrollView) -->
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/slot_master_title"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:layout_marginBottom="32dp" />
-
-        <!-- Wyświetlacz salda -->
-        <TextView
-            android:id="@+id/tvBalance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/balance"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Siatka slotów 3x3 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginBottom="24dp">
+            android:gravity="center">
 
-            <!-- Pierwszy wiersz -->
+            <!-- Nagłówek z tytułem i ikonką informacji -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <ImageView
-                    android:id="@+id/slot1"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-
-                <ImageView
-                    android:id="@+id/slot2"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-
-                <ImageView
-                    android:id="@+id/slot3"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-            </LinearLayout>
-
-            <!-- Drugi wiersz -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <ImageView
-                    android:id="@+id/slot4"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-
-                <ImageView
-                    android:id="@+id/slot5"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-
-                <ImageView
-                    android:id="@+id/slot6"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-            </LinearLayout>
-
-            <!-- Trzeci wiersz -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
-
-                <ImageView
-                    android:id="@+id/slot7"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-
-                <ImageView
-                    android:id="@+id/slot8"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-
-                <ImageView
-                    android:id="@+id/slot9"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:gravity="center"
-
-                    android:textSize="30sp"
-                    android:background="@drawable/slot_border"
-                    android:layout_margin="4dp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Wybór linii -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/choose_lines"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Kontener linii z zawijaniem -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginBottom="16dp">
-
-            <!-- Pierwszy wiersz linii -->
-            <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="32dp">
 
-                <CheckBox
-                    android:id="@+id/cbLine1"
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/line_1"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    android:padding="12dp"
-                    android:checked="true" />
+                    android:text="@string/slot_master_title"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary" />
 
-                <CheckBox
-                    android:id="@+id/cbLine2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/line_2"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    android:padding="12dp"
-                    android:layout_marginStart="16dp" />
 
-                <CheckBox
-                    android:id="@+id/cbLine3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/line_3"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    android:padding="12dp"
-                    android:layout_marginStart="16dp" />
+
+                <ImageView
+                    android:id="@+id/btnInfo"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="2dp"
+                    android:src="@drawable/ic_info"
+                    android:contentDescription="@string/info_icon_description"
+                    android:padding="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
 
             </LinearLayout>
 
-            <!-- Drugi wiersz linii -->
-            <LinearLayout
+            <!-- Wyświetlacz salda -->
+            <TextView
+                android:id="@+id/tvBalance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:text="@string/balance"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="24dp" />
 
-                <CheckBox
-                    android:id="@+id/cbLine4"
+            <!-- Siatka slotów 3x3 (bez zmian) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="24dp">
+
+                <!-- Pierwszy wiersz -->
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/line_4"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    android:padding="12dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
-                <CheckBox
-                    android:id="@+id/cbLine5"
+                    <ImageView
+                        android:id="@+id/slot1"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+
+                    <ImageView
+                        android:id="@+id/slot2"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+
+                    <ImageView
+                        android:id="@+id/slot3"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+                </LinearLayout>
+
+                <!-- Drugi wiersz -->
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/line_5"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
-                    android:padding="12dp"
-                    android:layout_marginStart="16dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/slot4"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+
+                    <ImageView
+                        android:id="@+id/slot5"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+
+                    <ImageView
+                        android:id="@+id/slot6"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+                </LinearLayout>
+
+                <!-- Trzeci wiersz -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/slot7"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+
+                    <ImageView
+                        android:id="@+id/slot8"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+
+                    <ImageView
+                        android:id="@+id/slot9"
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+                        android:padding="2dp"
+                        android:scaleType="centerInside"
+                        android:background="@drawable/slot_border_dark"
+                        android:layout_margin="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Wybór linii -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/choose_lines"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Kontener linii z zawijaniem -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
+
+                <!-- Pierwszy wiersz linii -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp">
+
+                    <CheckBox
+                        android:id="@+id/cbLine1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/line_1"
+                        android:minWidth="48dp"
+                        android:minHeight="48dp"
+                        android:padding="12dp"
+                        android:checked="true" />
+
+                    <CheckBox
+                        android:id="@+id/cbLine2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/line_2"
+                        android:minWidth="48dp"
+                        android:minHeight="48dp"
+                        android:padding="12dp"
+                        android:layout_marginStart="16dp" />
+
+                    <CheckBox
+                        android:id="@+id/cbLine3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/line_3"
+                        android:minWidth="48dp"
+                        android:minHeight="48dp"
+                        android:padding="12dp"
+                        android:layout_marginStart="16dp" />
+
+                </LinearLayout>
+
+                <!-- Drugi wiersz linii -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <CheckBox
+                        android:id="@+id/cbLine4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/line_4"
+                        android:minWidth="48dp"
+                        android:minHeight="48dp"
+                        android:padding="12dp" />
+
+                    <CheckBox
+                        android:id="@+id/cbLine5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/line_5"
+                        android:minWidth="48dp"
+                        android:minHeight="48dp"
+                        android:padding="12dp"
+                        android:layout_marginStart="16dp" />
+
+                </LinearLayout>
 
             </LinearLayout>
+
+            <!-- Informacje o stawce -->
+            <TextView
+                android:id="@+id/tvBetInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bet_info"
+                android:textSize="16sp"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Przyciski główne -->
+            <Button
+                android:id="@+id/btnSpin"
+                android:layout_width="200dp"
+                android:layout_height="60dp"
+                android:text="@string/spin"
+                android:textSize="17sp"
+                android:layout_marginBottom="4dp"
+                style="@style/Widget.Material3.Button" />
+
+            <Button
+                android:id="@+id/btnShowMap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🗺️ Mapa"
+                android:layout_margin="8dp" />
+
+
+
+            <!-- Sekcja informacji o czujnikach -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sensor_info"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Akcelerometr -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/accelerometer_info"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- Czujnik światła -->
+                    <TextView
+                        android:id="@+id/tvLightInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/light_info"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- GPS -->
+                    <TextView
+                        android:id="@+id/tvLocationInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/location_info"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Instrukcje -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/instructions"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/instruction_shake"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/instruction_light"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/instruction_location"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
 
-        <!-- Informacje o stawce -->
-        <TextView
-            android:id="@+id/tvBetInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/bet_info"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp" />
+    </ScrollView>
 
-        <!-- Przyciski -->
-        <Button
-            android:id="@+id/btnSpin"
-            android:layout_width="200dp"
-            android:layout_height="60dp"
-            android:text="@string/spin"
-            android:textSize="17sp"
-            android:layout_marginBottom="4dp"
-            style="@style/Widget.Material3.Button" />
-
-        <Button
-            android:id="@+id/btnReset"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="@string/reset_game"
-            android:textSize="18sp"
-            android:layout_marginBottom="32dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        <!-- Sekcja informacji o czujnikach -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            app:cardUseCompatPadding="true">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sensor_info"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Akcelerometr -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/accelerometer_info"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp" />
-
-                <!-- Czujnik światła -->
-                <TextView
-                    android:id="@+id/tvLightInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/light_info"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp" />
-
-                <!-- GPS -->
-                <TextView
-                    android:id="@+id/tvLocationInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/location_info"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Instrukcje -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/instructions"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/instruction_shake"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/instruction_light"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/instruction_location"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-    </LinearLayout>
-
-    <LinearLayout
+    <!-- 🔽 NOWY: Bottom Navigation Bar -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:background="?android:attr/windowBackground"
+        app:menu="@menu/bottom_navigation_menu"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@color/bottom_nav_color"
+        app:itemTextColor="@color/bottom_nav_color" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SLOT MASTER"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:layout_marginBottom="32dp" />
-
-        <!-- Wyświetlacz salda -->
-        <TextView
-            android:id="@+id/tvBalance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Saldo: 1000"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Sloty -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="32dp">
-
-            <TextView
-                android:id="@+id/slot1"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:gravity="center"
-                android:text="🍒"
-                android:textSize="40sp"
-                android:background="@drawable/slot_border"
-                android:layout_margin="8dp" />
-
-            <TextView
-                android:id="@+id/slot2"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:gravity="center"
-                android:text="🍒"
-                android:textSize="40sp"
-                android:background="@drawable/slot_border"
-                android:layout_margin="8dp" />
-
-            <TextView
-                android:id="@+id/slot3"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:gravity="center"
-                android:text="🍒"
-                android:textSize="40sp"
-                android:background="@drawable/slot_border"
-                android:layout_margin="8dp" />
-
-        </LinearLayout>
-
-        <!-- Przyciski -->
-        <Button
-            android:id="@+id/btnSpin"
-            android:layout_width="200dp"
-            android:layout_height="60dp"
-            android:text="SPIN (10 punktów)"
-            android:textSize="17sp"
-            android:layout_marginBottom="4dp"
-            style="@style/Widget.Material3.Button" />
-
-        <Button
-            android:id="@+id/btnReset"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Reset Gry"
-            android:textSize="18sp"
-            android:layout_marginBottom="32dp"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
-
-        <!-- Sekcja informacji o czujnikach -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            app:cardUseCompatPadding="true">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Informacje o czujnikach"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- Akcelerometr -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Akcelerometr: Potrząśnij aby zakręcić"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp" />
-
-                <!-- Czujnik światła -->
-                <TextView
-                    android:id="@+id/tvLightInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Tryb: Jasny"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="8dp" />
-
-                <!-- GPS -->
-                <TextView
-                    android:id="@+id/tvLocationInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Odwiedzone lokacje: 0/3"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Instrukcje -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Instrukcje"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="• Potrząśnij telefonem aby zakręcić"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="• Zmień oświetlenie aby przełączyć tryb jasny/ciemny"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="• Odwiedź specjalne lokalizacje aby zdobyć 100 punktów"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>

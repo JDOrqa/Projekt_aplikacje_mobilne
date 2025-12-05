@@ -4,5 +4,5 @@
         android:width="2dp"
         android:color="?android:attr/colorAccent" />
     <corners android:radius="8dp" />
-    <solid android:color="#A29696" />
+    <solid android:color="#AF270061" />
 </shape>

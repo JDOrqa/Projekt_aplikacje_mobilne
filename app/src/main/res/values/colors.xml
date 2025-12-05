@@ -10,4 +10,5 @@
     <color name="primary">#FFBB86FC</color>
     <color name="transparent">#00000000</color>
     <color name="neon_green_transparent">#3300FF00</color>
+    <color name="gray">#757575</color>
 </resources>

@@ -29,4 +29,12 @@
     <string name="line_3">Linia 3</string>
     <string name="line_4">Linia 4</string>
     <string name="line_5">Linia 5</string>
+
+    <string name="info_icon_description">Informacje o grze</string>
+    <string name="game_info_title">Jak grać w Slot Master?</string>
+    <string name="game_info_message"><b>🎰 ZASADY GRY:
+    </b>\n• Wybierz linie które chcesz aktywować\n• Każda linia kosztuje 10 punktów\n•
+        Więcej linii = większa szansa\n• Wygrana = wartość symbolu × 10\n\n<b>📊 WARTOŚCI SYMBOLI:</b>\n\n🍒 Wiśnia = 2× stawki\n🍋 Cytryna = 3× stawki  \n🌶️ Papryczka = 4× stawki\n🔔 Dzwonek = 10× stawki\n⭐ Gwiazda = 15× stawki\n7️⃣ Siódemka = 50× stawki (JACKPOT!)\n\n
+        <b>🎯 LINIE WYGRYWAJĄCE:</b>\n\n🔵🔵🔵 Linia 1: Górny wiersz\n⚪⚪⚪\n⚪⚪⚪  \n \n⚪⚪⚪ \n🔵🔵🔵 Linia 2: Środkowy wiersz Linia \n⚪⚪⚪ \n \n⚪⚪⚪\n🔵🔵🔵 Linia 3: Dolny wiersz\n⚪⚪⚪ \n \n🔵⚪⚪\n⚪🔵⚪Linia 4: Przekątna ↘\n⚪⚪🔵 \n \n⚪⚪🔵 \n⚪🔵⚪Linia 5: Przekątna ↙ \n🔵⚪⚪\n \n<b>📱 STEROWANIE:</b>\n• Kliknij SPIN\n• Lub potrząśnij telefonem</string>
+    <string name="ok_button">OK</string>
 </resources>
