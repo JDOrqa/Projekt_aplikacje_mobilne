@@ -14,7 +14,7 @@ import java.util.*
 class FirebirdApiManager(private val context: Context) {
 
     private val client = OkHttpClient()
-    private val baseUrl = "https://tangy-ducks-judge.loca.lt/api"
+    private val baseUrl = "https://jest-dobrze-jd.loca.lt/api"
 
     companion object {
         private const val TAG = "FirebirdApiManager"
