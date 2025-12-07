@@ -863,8 +863,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             slot.setBackgroundResource(R.drawable.slot_border_dark)
         }
     }
-
-    private fun checkWin() {
+private fun checkWin() {
         val slots = getSlotsList()
         val slotDrawables = slots.map { it.tag as? Int ?: R.drawable.cherry }
 
@@ -894,15 +893,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         if (totalWin > 0) {
             balance += totalWin
-            saveGameState()
 
             if (totalWin > biggestWin) {
                 biggestWin = totalWin
             }
 
+            // 🔽 ZAPISZ ZMIANY
+            saveGameState()
+
             // ZAPISZ DO FIREBIRD API
             updateDailyResultInDatabase()
-
+            if (winSound.isPlaying) {
+                winSound.seekTo(0)
+            }
+            winSound.start()
             Toast.makeText(
                 this,
                 "Wygrana: $totalWin punktów!",
@@ -910,6 +914,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             ).show()
         }
     }
+    
 
     private fun highlightWinningLine(lineIndices: List<Int>) {
         val slots = getSlotsList()
