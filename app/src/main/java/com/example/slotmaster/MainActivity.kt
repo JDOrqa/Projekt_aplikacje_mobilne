@@ -1255,7 +1255,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         private const val LOCATION_PERMISSION_REQUEST = 1001
     }
 }
-
+override fun onDestroy() {
+    super.onDestroy()
+    if (::spinSound.isInitialized) spinSound.release()
+    if (::winSound.isInitialized) winSound.release()
+}
 data class TargetLocation(
     val latitude: Double,
     val longitude: Double,
