@@ -39,6 +39,9 @@ import android.content.Intent
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
+    private lateinit var spinSound: MediaPlayer
+    private lateinit var winSound: MediaPlayer
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
