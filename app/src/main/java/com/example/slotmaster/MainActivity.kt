@@ -745,6 +745,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun spinSlots() {
+        if (spinSound.isPlaying) {
+            spinSound.seekTo(0)
+        }
+        spinSound.start()
         val totalBet = baseBet * selectedLines
 
         if (balance < totalBet) {
