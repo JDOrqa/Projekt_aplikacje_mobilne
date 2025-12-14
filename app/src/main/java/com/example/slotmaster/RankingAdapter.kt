@@ -46,3 +46,28 @@ override fun onBindViewHolder(holder: RankingViewHolder, position: Int) {
             }
         }
 }
+override fun getItemCount() = rankingItems.size
+
+    class RankingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
+        private val tvWinAmount: TextView = itemView.findViewById(R.id.tvWinAmount)
+        private val tvGamesCount: TextView = itemView.findViewById(R.id.tvGamesCount)
+        val tvRank: TextView = itemView.findViewById(R.id.tvRank)
+
+        fun bind(item: RankingItem) {
+            tvUserName.text = item.userName
+            tvWinAmount.text = "${item.biggestWin}💰"
+            tvGamesCount.text = if (item.gamesCount > 0) "${item.gamesCount} gier" else "Nowy gracz"
+            
+            // Podświetl obecnego użytkownika
+            val currentUserId = (itemView.context as? RankingActivity)?.let {
+                it.firebirdApiManager.getCurrentUserId()
+            }
+            
+            if (currentUserId == item.userId) {
+                itemView.setBackgroundColor(Color.parseColor("#E3F2FD"))
+                tvUserName.text = "⭐ ${item.userName} (TY)"
+            }
+        }
+    }
+    }
