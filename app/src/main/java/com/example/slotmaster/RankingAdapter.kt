@@ -17,3 +17,8 @@ class RankingAdapter(private var rankingItems: List<RankingItem>) :
         this.rankingItems = rankedItems
         notifyDataSetChanged()
     }
+override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RankingViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_ranking, parent, false)
+        return RankingViewHolder(view)
+}
