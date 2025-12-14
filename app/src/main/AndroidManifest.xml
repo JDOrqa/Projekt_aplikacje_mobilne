@@ -37,6 +37,11 @@
             android:name=".MapActivity"
             android:exported="false"
             android:theme="@style/Theme.SlotMaster" />
+        <activity
+            android:name=".RankingActivity"
+            android:label="Ranking Graczy"
+            android:theme="@style/Theme.SlotMaster"
+            android:parentActivityName=".MainActivity"/>
 
     </application>
 </manifest>

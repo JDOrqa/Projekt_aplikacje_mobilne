@@ -16,7 +16,7 @@ import java.util.*
 class FirebirdApiManager(private val context: Context) {
 
     private val client = OkHttpClient()
-    private val baseUrl = "https://tangy-ducks-judge.loca.lt/api"
+    private val baseUrl = "https://jest-dobrze-jd.loca.lt/api"
 
     companion object {
         private const val TAG = "FirebirdApiManager"
@@ -27,7 +27,7 @@ class FirebirdApiManager(private val context: Context) {
         return getUserId()
     }
 
-    //  PUBLICZNA METODA DO USTAWIANIA USER_ID
+    // 🔽 PUBLICZNA METODA DO USTAWIANIA USER_ID
     fun setUserId(userId: String) {
         val prefs = context.getSharedPreferences("FirebirdPrefs", Context.MODE_PRIVATE)
         prefs.edit().putString("user_id", userId).apply()
@@ -45,7 +45,7 @@ class FirebirdApiManager(private val context: Context) {
 
         return userId
     }
-    //  DODAJĘ TEST CONNECTION
+    // 🔽 DODAJĘ TEST CONNECTION
     suspend fun testConnection(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
@@ -317,19 +317,27 @@ class FirebirdApiManager(private val context: Context) {
                 val userId = getUserId()
                 val currentDate = getCurrentDate()
 
-                Log.d(TAG, "💾 Próbuję zapisać wynik: data=$currentDate, saldo=$finalBalance, NOWE spiny=$newSpinsCount, wygrana=$biggestWin")
+                Log.d(TAG, "💾 Zapis wyniku: data=$currentDate, saldo=$finalBalance, spiny=$newSpinsCount, wygrana=$biggestWin")
 
                 // 1. Pobierz istniejący wpis na dzisiaj
                 val existingRecord = getTodaysRecord()
 
                 if (existingRecord != null) {
-                    // 2. Jeśli istnieje - aktualizuj z SUMOWANIEM tylko NOWYCH spinów
-                    Log.d(TAG, "🔄 Aktualizuję istniejący wpis: ${existingRecord.id}")
+                    // 🔽 WALIDACJA: UŻYJ WIĘKSZEJ WARTOŚCI ZAMIEST SUMOWANIA
+                    val currentServerSpins = existingRecord.spinsCount
 
-                    val updatedSpinsCount = existingRecord.spinsCount + newSpinsCount
+                    // Jeśli nowa wartość jest większa, użyj jej (ochrona przed duplikacją)
+                    val updatedSpinsCount = if (newSpinsCount > currentServerSpins) {
+                        Log.d(TAG, "🔄 Aktualizuję spiny: $currentServerSpins -> $newSpinsCount")
+                        newSpinsCount
+                    } else {
+                        Log.d(TAG, "⚠️ Zachowam istniejące spiny: $currentServerSpins (nowe: $newSpinsCount)")
+                        currentServerSpins
+                    }
+
                     val updatedBiggestWin = maxOf(existingRecord.biggestWin, biggestWin)
 
-                    Log.d(TAG, "📊 Nowe wartości: stare spiny=${existingRecord.spinsCount} + nowe=$newSpinsCount = $updatedSpinsCount, wygrana=$updatedBiggestWin")
+                    Log.d(TAG, "📊 Finał: spiny=$updatedSpinsCount, wygrana=$updatedBiggestWin")
 
                     return@withContext updateDailyResult(
                         finalBalance = finalBalance,
@@ -337,8 +345,8 @@ class FirebirdApiManager(private val context: Context) {
                         biggestWin = updatedBiggestWin
                     )
                 } else {
-                    // 3. Jeśli nie istnieje - użyj podanej liczby spinów (pierwszy zapis dnia)
-                    Log.d(TAG, "🆕 Tworzę nowy wpis na dzisiaj z spinami: $newSpinsCount")
+                    // Nowy wpis - użyj podanej liczby spinów
+                    Log.d(TAG, "🆕 Nowy wpis z spinami: $newSpinsCount")
                     return@withContext createDailyResult(
                         finalBalance = finalBalance,
                         spinsCount = newSpinsCount,

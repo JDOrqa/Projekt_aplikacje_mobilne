@@ -35,6 +35,7 @@ import android.util.Log
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import android.content.Intent
+import android.media.MediaPlayer
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -46,13 +47,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
+    private lateinit var spinSound: MediaPlayer
+
+    private lateinit var winSound: MediaPlayer
+
+
     private var balance: Int = 5000
     private var lastShakeTime: Long = 0
     private val SHAKE_THRESHOLD = 15f
     private val SHAKE_TIMEOUT = 1000
     private val KEY_DARK_MODE = "dark_mode"
 
-    // Zmienne do bazy danych - TERAZ Firebird API
+    // Zmienne do bazy danych - TYLKO Firebird API
     private lateinit var firebirdApiManager: FirebirdApiManager
     private var spinsCount = 0
     private var biggestWin = 0
@@ -123,6 +129,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // dźwięki
+        spinSound = MediaPlayer.create(this, R.raw.spin)
+        winSound = MediaPlayer.create(this, R.raw.wygrana)
+
+// Głośność
+        spinSound.setVolume(1f, 1f)
+        winSound.setVolume(1f, 1f)
+
+
         // 3. Inicjalizacja UI elementów
         slot1 = binding.slot1
         slot2 = binding.slot2
@@ -134,13 +149,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         slot8 = binding.slot8
         slot9 = binding.slot9
 
-        // 4. Inicjalizacja managerów
+        // 4. Inicjalizacja managerów - TYLKO Firebird API
         firebirdApiManager = FirebirdApiManager(this)
 
-        // 5. Ładowanie danych
+        // 5. Ładowanie danych - NAJPIERW LOKALNIE, POTEM SERWER
+        loadFromSharedPreferences()  // 🔽 NAJPIERW ZAWSZE Z SHAREDPREFERENCES
+
         scope.launch {
-            firebirdApiManager.getSharedUserId()
-            loadGameState()
+            try {
+                firebirdApiManager.getSharedUserId()
+                // 🔽 POTEM SPRÓBUJ Z SERWERA
+                val serverGameState = firebirdApiManager.loadGameStateFromServer()
+                if (serverGameState != null) {
+                    // SERWER MA DANE - ZASTOSUJ JE
+                    applyGameStateFromServer(serverGameState)
+                    Log.d("MainActivity", "✅ Załadowano stan z SERWERA")
+                } else {
+                    Log.d("MainActivity", "⚠️ Serwer nie ma danych, używam lokalnych")
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ Błąd ładowania z serwera: ${e.message}")
+                // ZOSTAW LOKALNE DANE
+            }
+
             checkAndSavePreviousDay()
         }
 
@@ -153,6 +184,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         // 7. Update UI
         updateUI()
+        Log.d("MainActivity", "🎮 Stan po onCreate: balance=$balance, spiny=$spinsCount")
     }
 
     private fun initializeSensors() {
@@ -173,6 +205,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             binding.tvLightInfo.text = "Czujnik światła: NIE DOSTĘPNY"
         }
     }
+
     private fun testApiConnection() {
         scope.launch {
             Log.d("MainActivity", "🧪 Rozpoczynam test API...")
@@ -198,6 +231,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
     }
+
     private fun initializeLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -211,7 +245,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         startLocationUpdates()
     }
-
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
@@ -256,7 +289,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     // Nowa metoda z dodatkowymi opcjami
     private fun showMoreOptionsDialog() {
-        val options = arrayOf("🔧 Test API", "📊 Historia", "🔄 Reset Gry", "ℹ️ Informacje")
+        val options = arrayOf("🔧 Test API", "📊 Historia", "🔄 Reset Gry", "ℹ️ Informacje", "🏆 Ranking graczy")
 
         AlertDialog.Builder(this)
             .setTitle("⚙️ Więcej Opcji")
@@ -266,13 +299,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     1 -> showHistory()
                     2 -> resetGame()
                     3 -> showGameInfoDialog()
+                    4 -> showRanking()
                 }
             }
             .setNegativeButton("Anuluj", null)
             .show()
     }
+    private fun showRanking() {
 
-
+        val intent = Intent(this, RankingActivity::class.java)
+        startActivity(intent)
+    }
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -348,15 +385,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun setupClickListeners() {
-
-
         binding.btnSpin.setOnClickListener {
             spinSlots()
         }
-
-//        binding.btnReset.setOnClickListener {
-//            resetGame()
-//        }
 
         binding.btnInfo.setOnClickListener {
             showGameInfoDialog()
@@ -365,26 +396,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding.btnShowMap.setOnClickListener {
             showMap()
         }
-
-//        binding.btnHistory.setOnClickListener {
-//            showHistory()
-//        }
-//
-//        binding.btnSelectUser.setOnClickListener {
-//            showUserSelection()
-//        }
-//
-//        binding.btnCreateUser.setOnClickListener {
-//            showCreateUserDialog()
-//        }
-//
-//        binding.btnCurrentUser.setOnClickListener {
-//            showCurrentUserInfo()
-//        }
-//
-//        binding.btnTestConnection.setOnClickListener {
-//            testApiConnection()
-//        }
 
         // Listenery dla checkboxów linii
         getLineCheckboxesList().forEach { checkbox ->
@@ -427,10 +438,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding.tvBetInfo.text = "Stawka: $totalBet punktów ($selectedLines linii)"
     }
 
-
     private fun showCurrentUserInfo() {
         scope.launch {
-            val userId = firebirdApiManager.getCurrentUserId() // 🔽 ZMIANA
+            val userId = firebirdApiManager.getCurrentUserId()
             val userName = extractUserNameFromId(userId)
 
             runOnUiThread {
@@ -446,6 +456,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
     }
+
     private fun showMap() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
@@ -470,6 +481,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
     }
+
     // Metoda: Wybór usera z listy
     private fun showUserSelection() {
         scope.launch {
@@ -493,7 +505,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     "${it.userName} (${it.balance}💰)"
                 }.toTypedArray()
 
-                val currentUserId = firebirdApiManager.getCurrentUserId() // 🔽 ZMIANA
+                val currentUserId = firebirdApiManager.getCurrentUserId()
                 var selectedIndex = -1
 
                 android.app.AlertDialog.Builder(this@MainActivity)
@@ -547,28 +559,27 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun switchUser(newUserId: String) {
         scope.launch {
             try {
-                Log.d("MainActivity", "🔄 Rozpoczynam przełączanie usera na: $newUserId")
+                Log.d("MainActivity", "🔄 Przełączam usera na: $newUserId")
 
-                // 1. Przełącz usera
+                // 1. ZAPISZ AKTUALNY STAN PRZED PRZEŁĄCZENIEM
+                saveGameState()
+
+                // 2. Przełącz usera
                 firebirdApiManager.setUserId(newUserId)
 
-                // 2. NAJPIERW spróbuj załadować z serwera
+                // 3. Załaduj stan z serwera
                 val serverGameState = firebirdApiManager.loadGameStateFromServer()
 
                 runOnUiThread {
                     if (serverGameState != null) {
-                        // 3. Użyj danych Z SERWERA
-                        applyServerGameState(serverGameState)
-                        Log.d("MainActivity", "✅ Załadowano stan z SERWERA: balance=${serverGameState.balance}")
+                        // SERWER MA DANE - ZASTOSUJ JE
+                        applyGameStateFromServer(serverGameState)
                         Toast.makeText(this@MainActivity, "✅ Przełączono usera! Saldo: ${serverGameState.balance}", Toast.LENGTH_LONG).show()
                     } else {
-                        // 4. SERWER NIE ODPOWIEDZIAŁ - dopiero TERAZ wyczyść i załaduj lokalne
-                        clearLocalGameState()
-                        loadLocalGameState()
-                        Log.d("MainActivity", "⚠️ Brak danych online, użyto lokalnych: balance=$balance")
-                        Toast.makeText(this@MainActivity, "⚠️ Przełączono usera (brak danych online)", Toast.LENGTH_LONG).show()
+                        // SERWER NIE MA DANYCH - ZRESETUJ DO DEFAULTOWYCH
+                        resetToDefaultState()
+                        Toast.makeText(this@MainActivity, "🆕 Nowy user - domyślny stan", Toast.LENGTH_LONG).show()
                     }
-
                     updateUI()
                 }
             } catch (e: Exception) {
@@ -579,14 +590,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
     }
-    private fun applyServerGameState(gameState: GameState) {
+
+    // 🔽 NOWA METODA: Załaduj stan z serwera
+    private fun applyGameStateFromServer(gameState: GameState) {
+        // Aktualizuj dane z serwera
         balance = gameState.balance
         spinsCount = gameState.spinsCount
         biggestWin = gameState.biggestWin
         selectedLines = gameState.selectedLines
         lastShakeTime = gameState.lastShakeTime
 
-        // Ustaw odwiedzone lokacje
         gameState.visitedLocations.forEachIndexed { index, visited ->
             if (index < targetLocations.size) {
                 targetLocations[index].visited = visited
@@ -595,16 +608,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         // Ustaw checkboxy linii
         getLineCheckboxesList().forEachIndexed { index, checkbox ->
-            checkbox.isChecked = selectedLines > index
+            checkbox.isChecked = index < selectedLines
         }
 
-        Log.d("MainActivity", "🎮 Zastosowano stan gry: balance=$balance, lines=$selectedLines")
+        // 🔽 ZAPISZ DO SHAREDPREFERENCES
+        saveToSharedPreferences()
+
+        Log.d("MainActivity", "🎮 Załadowano stan z serwera: balance=$balance, lines=$selectedLines")
     }
 
-    private fun loadLocalGameState() {
+    // 🔽 METODA: Załaduj z SharedPreferences
+    private fun loadFromSharedPreferences() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-        balance = prefs.getInt("balance", 5000)
+        // 🔽 NIE resetuj jeśli są zapisane dane!
+        balance = prefs.getInt("balance", 5000)  // Domyślnie 5000 tylko przy pierwszym uruchomieniu
         spinsCount = prefs.getInt("spinsCount", 0)
         biggestWin = prefs.getInt("biggestWin", 0)
         selectedLines = prefs.getInt("selectedLines", 1)
@@ -620,41 +638,64 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             checkbox.isChecked = prefs.getBoolean("line${index+1}_checked", index == 0)
         }
 
-        Log.d("MainActivity", "📱 Załadowano stan LOKALNY: balance=$balance")
+        Log.d("MainActivity", "📱 Załadowano z SharedPreferences: balance=$balance, spiny=$spinsCount")
     }
 
-    private fun clearLocalGameState() {
-        // Tylko resetuj zmienne, NIE zapisuj do SharedPreferences!
+    // 🔽 METODA: Zapisz do SharedPreferences
+    private fun saveToSharedPreferences() {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putInt("balance", balance)
+            putInt("spinsCount", spinsCount)
+            putInt("biggestWin", biggestWin)
+            putLong("lastShakeTime", lastShakeTime)
+            putBoolean("location1_visited", targetLocations[0].visited)
+            putBoolean("location2_visited", targetLocations[1].visited)
+            putBoolean("location3_visited", targetLocations[2].visited)
+            putInt("selectedLines", selectedLines)
+            getLineCheckboxesList().forEachIndexed { index, checkbox ->
+                putBoolean("line${index+1}_checked", checkbox.isChecked)
+            }
+            apply()
+        }
+        Log.d("MainActivity", "💾 Zapisano do SharedPreferences: balance=$balance")
+    }
+
+    private fun resetToDefaultState() {
+        // 🔽 UŻYWAJ TYLKO DO RĘCZNEGO RESETU GRY LUB NOWEGO USERA!
         balance = 5000
         spinsCount = 0
         biggestWin = 0
         selectedLines = 1
         lastShakeTime = 0
 
-        // Resetuj lokacje
         targetLocations.forEach { it.visited = false }
-
-        // Resetuj checkboxy (tylko w UI)
         getLineCheckboxesList().forEachIndexed { index, checkbox ->
             checkbox.isChecked = index == 0
         }
 
-        Log.d("MainActivity", "🧹 Wyczyszczono TYMCZASOWO lokalny stan gry")
+        // 🔽 ZAPISZ ZRESETOWANY STAN
+        saveGameState()
+
+        Log.d("MainActivity", "🔄 Ręczny reset gry do wartości domyślnych")
     }
 
     // Metoda: Utwórz nowego usera
     private fun createNewUser(userName: String) {
         scope.launch {
-            //  ZAPISZ aktualny stan przed przełączeniem
+            // ZAPISZ aktualny stan przed przełączeniem
             saveGameState()
 
             val newUserId = firebirdApiManager.createUser(userName)
 
-            // WYCZYŚĆ lokalny stan
-            clearLocalGameState()
+            // Ustaw nowego usera
+            firebirdApiManager.setUserId(newUserId)
 
-            //  Załaduj nowy stan (zresetowany dla nowego usera)
-            loadGameState()
+            // Zresetuj stan dla nowego usera
+            resetToDefaultState()
+
+            // 🔽 ZAPISZ ZRESETOWANY STAN NA SERWERZE
+            saveGameState()
 
             runOnUiThread {
                 Toast.makeText(this@MainActivity, "✅ Utworzono nowego usera: $userName", Toast.LENGTH_LONG).show()
@@ -742,6 +783,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun spinSlots() {
+
+        // 🔽 SPRAWDŹ NOWY DZIEŃ PRZED KAŻDYM SPINEM
+        checkAndHandleNewDay()
+        if (spinSound.isPlaying) {
+            spinSound.seekTo(0)
+        }
+        spinSound.start()
+
+
         val totalBet = baseBet * selectedLines
 
         if (balance < totalBet) {
@@ -749,14 +799,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             return
         }
 
-        //  Tylko 1 spin na raz!
-        val newSpinCount = 1
-        spinsCount += newSpinCount  // lokalne zliczanie
+        // TYLKO LOKALNE ZLICZANIE
+        spinsCount += 1
         balance -= totalBet
+
+        // 🔽 ZAWSZE ZAPISZ DO SHAREDPREFERENCES
         saveGameState()
 
-        //  Przekaż tylko 1 spin do zapisu w bazie
-        updateDailyResultInDatabase(newSpinCount)
+        // PRZEKAŻ AKTUALNY STAN DO SERWERA
+        updateDailyResultInDatabase()
 
         val slots = getSlotsList()
         val handler = Handler(Looper.getMainLooper())
@@ -894,15 +945,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         if (totalWin > 0) {
             balance += totalWin
-            saveGameState()
 
             if (totalWin > biggestWin) {
                 biggestWin = totalWin
             }
 
+            // 🔽 ZAPISZ ZMIANY
+            saveGameState()
+
             // ZAPISZ DO FIREBIRD API
             updateDailyResultInDatabase()
-
+            if (winSound.isPlaying) {
+                winSound.seekTo(0)
+            }
+            winSound.start()
             Toast.makeText(
                 this,
                 "Wygrana: $totalWin punktów!",
@@ -960,24 +1016,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun resetGame() {
-        balance = 5000
-        targetLocations.forEach { it.visited = false }
+        scope.launch {
+            // ZAPISZ STAN PRZED RESETEM
+            saveGameState()
 
-        // ✅ Zresetuj liczniki
-        spinsCount = 0
-        biggestWin = 0
+            // Zresetuj lokalne zmienne
+            resetToDefaultState()
 
-        selectedLines = 1
-        getLineCheckboxesList().forEachIndexed { index, checkbox ->
-            checkbox.isChecked = index == 0
+            // ZAPISZ ZRESETOWANY STAN NA SERWERZE
+            saveGameState()
+
+            runOnUiThread {
+                updateUI()
+                Toast.makeText(this@MainActivity, "Gra zresetowana!", Toast.LENGTH_SHORT).show()
+            }
         }
-
-        saveGameState()
-
-
-
-        updateUI()
-        Toast.makeText(this, "Gra zresetowana!", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateUI() {
@@ -990,103 +1043,54 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         val visitedCount = targetLocations.count { it.visited }
         binding.tvLocationInfo.text = "Odwiedzone lokacje: $visitedCount/${targetLocations.size}"
-
-        scope.launch {
-            val userId = firebirdApiManager.getCurrentUserId()
-            val userName = extractUserNameFromId(userId)
-
-        }
     }
 
-    // NOWA METODA: Aktualizuj wynik w Firebird API
-    private fun updateDailyResultInDatabase(newSpins: Int = 1) {
-        if (newSpins <= 0) return
-
+    // METODA: Aktualizuj wynik w Firebird API
+    private fun updateDailyResultInDatabase() {
         scope.launch {
-            val success = firebirdApiManager.saveDailyResult(
-                finalBalance = balance,
-                newSpinsCount = newSpins,  //  Tylko nowe spiny
-                biggestWin = biggestWin
-            )
+            try {
+                val success = firebirdApiManager.saveDailyResult(
+                    finalBalance = balance,
+                    newSpinsCount = spinsCount,  // CAŁKOWITA LICZBA SPINÓW
+                    biggestWin = biggestWin
+                )
 
-            if (!success) {
-                runOnUiThread {
-                    Toast.makeText(this@MainActivity, "Błąd zapisu w chmurze", Toast.LENGTH_SHORT).show()
+                if (!success) {
+                    Log.e("MainActivity", "❌ Błąd zapisu spinów na serwerze")
+                } else {
+                    Log.d("MainActivity", "✅ Zapisano spiny na serwerze: $spinsCount")
                 }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ Błąd połączenia z serwerem: ${e.message}")
+                // Nie pokazuj Toast - użytkownik może być offline
             }
         }
     }
-
 
     private fun saveGameState() {
-        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().apply {
-            putInt("balance", balance)
-            putLong("lastShakeTime", lastShakeTime)
-            putBoolean("location1_visited", targetLocations[0].visited)
-            putBoolean("location2_visited", targetLocations[1].visited)
-            putBoolean("location3_visited", targetLocations[2].visited)
-            putInt("selectedLines", selectedLines)
-            putInt("spinsCount", spinsCount)
-            putInt("biggestWin", biggestWin)
-            getLineCheckboxesList().forEachIndexed { index, checkbox ->
-                putBoolean("line${index+1}_checked", checkbox.isChecked)
-            }
-            apply()
-        }
+        // 🔽 ZAWSZE ZAPISUJ DO SHAREDPREFERENCES
+        saveToSharedPreferences()
 
-        // 🔽 SYNCHRONIZUJ Z SERWEREM
+        // 🔽 PRÓBUJ ZSYNCHRONIZOWAĆ Z SERWEREM (ale nie blokuj)
         scope.launch {
-            val visitedLocations = targetLocations.map { it.visited }
-            firebirdApiManager.saveGameStateToServer(
-                balance = balance,
-                spinsCount = spinsCount,
-                biggestWin = biggestWin,
-                visitedLocations = visitedLocations,
-                selectedLines = selectedLines,
-                lastShakeTime = lastShakeTime
-            )
-        }
-    }
-
-    private fun loadGameState(forceFromServer: Boolean = true) {
-        scope.launch {
-            val serverGameState = firebirdApiManager.loadGameStateFromServer()
-
-            runOnUiThread {
-                if (serverGameState != null) {
-                    // Użyj danych z serwera
-                    balance = serverGameState.balance
-                    spinsCount = serverGameState.spinsCount
-                    biggestWin = serverGameState.biggestWin
-                    selectedLines = serverGameState.selectedLines
-                    lastShakeTime = serverGameState.lastShakeTime
-
-                    serverGameState.visitedLocations.forEachIndexed { index, visited ->
-                        if (index < targetLocations.size) {
-                            targetLocations[index].visited = visited
-                        }
-                    }
-
-                    Log.d("MainActivity", "✅ Załadowano stan z SERWERA: balance=$balance")
-                } else {
-
-                    loadLocalGameState()
-                }
-
-                updateUI()
+            try {
+                val visitedLocations = targetLocations.map { it.visited }
+                firebirdApiManager.saveGameStateToServer(
+                    balance = balance,
+                    spinsCount = spinsCount,
+                    biggestWin = biggestWin,
+                    visitedLocations = visitedLocations,
+                    selectedLines = selectedLines,
+                    lastShakeTime = lastShakeTime
+                )
+                Log.d("MainActivity", "✅ Zsynchronizowano stan gry z serwerem")
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ Błąd synchronizacji: ${e.message}")
+                // Nie pokazuj Toast - użytkownik może być offline
             }
         }
     }
-    private fun resetSpinsCounter() {
-        spinsCount = 0
-        saveGameState()
 
-        scope.launch {
-            // Zresetuj również na serwerze
-            firebirdApiManager.saveDailyResult(balance, 0, biggestWin)
-        }
-    }
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
     override fun onRequestPermissionsResult(
@@ -1107,6 +1111,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         accelerometer?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
         lightSensor?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
         startLocationUpdates()
+
+        // SPRAWDŹ NOWY DZIEŃ PRZY KAŻDYM WZNOWIENIU APLIKACJI
+        checkAndHandleNewDay()
+
+        Log.d("MainActivity", "🔄 onResume - stan: balance=$balance")
     }
 
     override fun onPause() {
@@ -1114,52 +1123,87 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         sensorManager.unregisterListener(this)
         fusedLocationClient.removeLocationUpdates(locationCallback)
 
-        //  ZABEZPIECZENIE: Tylko zapisuj jeśli spinsCount się nie zmniejszyło
-        if (spinsCount >= getLastSavedSpinsCount()) {
-            saveGameState()
-            saveDailyResultIfNeeded()
-        }
-    }
+        // 🔽 ZAWSZE ZAPISUJ PRZED WYŁĄCZENIEM
+        saveGameState()
 
-    private fun getLastSavedSpinsCount(): Int {
-        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.getInt("spinsCount", 0)
+        // 🔽 ZAPISZ WYNIK DNIA (opcjonalnie)
+        saveDailyResultIfNeeded()
+
+        Log.d("MainActivity", "⏸️ onPause - zapisano: balance=$balance")
     }
 
     // METODY DLA FIREBIRD API
-
-    private fun saveDailyResultIfNeeded() {
+    private fun saveDailyResultIfNeeded(forceSave: Boolean = false) {
         scope.launch {
+            // SPRAWDŹ CZY TO NOWY DZIEŃ PRZED ZAPISEM
+            checkAndHandleNewDay()
+
             val isSaved = firebirdApiManager.isTodaySaved()
-            if (!isSaved) {
-                val success = firebirdApiManager.saveDailyResult(
-                    finalBalance = balance,
-                    newSpinsCount = spinsCount,
-                    biggestWin = biggestWin
-                )
+            if (!isSaved || forceSave) {
+                try {
+                    val success = firebirdApiManager.saveDailyResult(
+                        finalBalance = balance,
+                        newSpinsCount = spinsCount,  // CAŁKOWITA LICZBA
+                        biggestWin = biggestWin
+                    )
 
-                if (success) {
-                    runOnUiThread {
-                        Toast.makeText(this@MainActivity, "Wynik dnia zapisany w chmurze!", Toast.LENGTH_SHORT).show()
+                    if (success) {
+                        Log.d("MainActivity", "💾 Wynik dnia zapisany: $spinsCount spinów")
+                    } else {
+                        Log.e("MainActivity", "❌ Błąd zapisu wyniku dnia")
                     }
-
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "❌ Błąd połączenia przy zapisie dnia: ${e.message}")
                 }
             }
         }
     }
 
-    private fun checkNewDay() {
+    private fun checkAndHandleNewDay(): Boolean {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val lastSaveDate = prefs.getString("lastSaveDate", "")
-        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val currentDate = getCurrentDate()
 
-        if (lastSaveDate != currentDate) {
-            // Nowy dzień - resetuj liczniki
+        if (lastSaveDate != currentDate && lastSaveDate?.isNotEmpty() == true) {
+            Log.d("MainActivity", "🆕 WYKRYTO NOWY DZIEŃ: $lastSaveDate -> $currentDate")
+
+            // ZAPISZ WYNIK POPRZEDNIEGO DNIA NA SERWERZE
+            scope.launch {
+                try {
+                    firebirdApiManager.saveDailyResult(
+                        finalBalance = balance,
+                        newSpinsCount = spinsCount,
+                        biggestWin = biggestWin
+                    )
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "❌ Błąd zapisu poprzedniego dnia: ${e.message}")
+                }
+            }
+
+            // Resetuj tylko liczniki, zachowaj saldo
             spinsCount = 0
             biggestWin = 0
+
+            // Zapisz zresetowany stan
+            saveGameState()
+
             prefs.edit().putString("lastSaveDate", currentDate).apply()
-            Log.d("MainActivity", "🆕 NOWY DZIEŃ - resetuję liczniki")
+
+            runOnUiThread {
+                Toast.makeText(this, "🆕 Nowy dzień! Liczniki zresetowane", Toast.LENGTH_SHORT).show()
+            }
+
+            return true
+        } else if (lastSaveDate?.isEmpty() == true) {
+            // Pierwsze uruchomienie - ustaw dzisiejszą datę
+            prefs.edit().putString("lastSaveDate", currentDate).apply()
         }
+
+        return false
+    }
+
+    private fun getCurrentDate(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     }
 
     private fun checkAndSavePreviousDay() {
@@ -1248,7 +1292,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
     }
-
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::spinSound.isInitialized) spinSound.release()
+        if (::winSound.isInitialized) winSound.release()
+    }
     companion object {
         private const val LOCATION_PERMISSION_REQUEST = 1001
     }
