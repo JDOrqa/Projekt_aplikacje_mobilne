@@ -58,17 +58,9 @@ override fun getItemCount() = rankingItems.size
         fun bind(item: RankingItem) {
             tvUserName.text = item.userName
             tvWinAmount.text = "${item.biggestWin}💰"
-            tvGamesCount.text = if (item.gamesCount > 0) "${item.gamesCount} gier" else "Nowy gracz"
-            
-            // Podświetl obecnego użytkownika
-            val currentUserId = (itemView.context as? RankingActivity)?.let {
-                it.firebirdApiManager.getCurrentUserId()
-            }
-            
-            if (currentUserId == item.userId) {
-                itemView.setBackgroundColor(Color.parseColor("#E3F2FD"))
-                tvUserName.text = "⭐ ${item.userName} (TY)"
-            }
+            tvGamesCount.text = if (item.gamesCount > 0) "Gry: ${item.gamesCount}" else ""
+
+
         }
     }
     }

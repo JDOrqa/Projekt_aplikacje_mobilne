@@ -114,7 +114,7 @@ class RankingActivity : AppCompatActivity() {
                 userName = user.userName.ifEmpty { extractUserNameFromId(user.userId) },
                 biggestWin = user.balance, // Używamy balance jako biggestWin
                 rank = 0, // Tymczasowo 0, posortujemy później
-                gamesCount = 0 // Możesz dodać liczbę gier jeśli masz takie dane
+                gamesCount = 0
             )
         }
     }

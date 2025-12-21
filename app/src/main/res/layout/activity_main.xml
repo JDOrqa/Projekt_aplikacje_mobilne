@@ -288,7 +288,28 @@
                 android:text="🗺️ Mapa"
                 android:layout_margin="8dp" />
 
+            <Button
+                android:id="@+id/btnMysteryBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎁 Mystery Box"
+                android:backgroundTint="#FF9800"
+                android:layout_margin="8dp"
+                android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/btnShowMap"
+            app:layout_constraintStart_toStartOf="parent"/>
 
+            <TextView
+                android:id="@+id/tvMysteryBoxTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎁 Za: 5:00"
+                android:textSize="14sp"
+                android:textColor="#FF9800"
+                android:layout_margin="4dp"
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@+id/btnShowMap"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
             <!-- Sekcja informacji o czujnikach -->
             <androidx.cardview.widget.CardView
