@@ -6,7 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-class RankingAdapter(private var rankingItems: List<RankingItem>) : 
+
+class RankingAdapter(private var rankingItems: List<RankingItem>) :
     RecyclerView.Adapter<RankingAdapter.RankingViewHolder>() {
 
     fun updateData(newItems: List<RankingItem>) {

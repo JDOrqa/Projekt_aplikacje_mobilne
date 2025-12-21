@@ -300,6 +300,63 @@ class FirebirdApiManager(private val context: Context) {
 
 
 
+    private fun getCurrentDate(): String {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    }
+
+    private fun getCurrentDateTime(): String {
+        return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+    }
+
+    suspend fun saveDailyResult(finalBalance: Int, newSpinsCount: Int, biggestWin: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val userId = getUserId()
+                val currentDate = getCurrentDate()
+
+                Log.d(TAG, "💾 Zapis wyniku: data=$currentDate, saldo=$finalBalance, spiny=$newSpinsCount, wygrana=$biggestWin")
+
+                // 1. Pobierz istniejący wpis na dzisiaj
+                val existingRecord = getTodaysRecord()
+
+                if (existingRecord != null) {
+                    // 🔽 WALIDACJA: UŻYJ WIĘKSZEJ WARTOŚCI ZAMIEST SUMOWANIA
+                    val currentServerSpins = existingRecord.spinsCount
+
+                    // Jeśli nowa wartość jest większa, użyj jej (ochrona przed duplikacją)
+                    val updatedSpinsCount = if (newSpinsCount > currentServerSpins) {
+                        Log.d(TAG, "🔄 Aktualizuję spiny: $currentServerSpins -> $newSpinsCount")
+                        newSpinsCount
+                    } else {
+                        Log.d(TAG, "⚠️ Zachowam istniejące spiny: $currentServerSpins (nowe: $newSpinsCount)")
+                        currentServerSpins
+                    }
+
+                    val updatedBiggestWin = maxOf(existingRecord.biggestWin, biggestWin)
+
+                    Log.d(TAG, "📊 Finał: spiny=$updatedSpinsCount, wygrana=$updatedBiggestWin")
+
+                    return@withContext updateDailyResult(
+                        finalBalance = finalBalance,
+                        spinsCount = updatedSpinsCount,
+                        biggestWin = updatedBiggestWin
+                    )
+                } else {
+                    // Nowy wpis - użyj podanej liczby spinów
+                    Log.d(TAG, "🆕 Nowy wpis z spinami: $newSpinsCount")
+                    return@withContext createDailyResult(
+                        finalBalance = finalBalance,
+                        spinsCount = newSpinsCount,
+                        biggestWin = biggestWin
+                    )
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "💥 Błąd zapisu: ${e.message}")
+                false
+            }
+        }
+    }
 
 
 
