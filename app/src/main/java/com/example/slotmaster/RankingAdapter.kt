@@ -61,7 +61,7 @@ class RankingAdapter(private var rankingItems: List<RankingItem>) :
         fun bind(item: RankingItem) {
             tvUserName.text = item.userName
             tvWinAmount.text = "${item.biggestWin}💰"
-            tvGamesCount.text = if (item.gamesCount > 0) "${item.gamesCount} gier" else "Nowy gracz"
+            tvGamesCount.text = if (item.gamesCount > 0) "Gry: ${item.gamesCount}" else ""
 
 
         }

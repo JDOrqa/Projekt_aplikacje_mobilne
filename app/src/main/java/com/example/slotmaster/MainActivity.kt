@@ -2,6 +2,7 @@ package com.example.slotmaster
 
 import android.Manifest
 import android.animation.ObjectAnimator
+import android.app.Dialog
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Sensor
@@ -35,7 +36,12 @@ import android.util.Log
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.media.MediaPlayer
+import android.widget.TextView
+import android.view.View
+
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -77,6 +83,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var slot8: ImageView
     private lateinit var slot9: ImageView
 
+
+    private val MYSTERY_BOX_INTERVAL = 5 * 60 * 1000L // 5 minut w milisekundach
+    private lateinit var mysteryBoxHandler: Handler
+    private var mysteryBoxRunnable: Runnable? = null
+    private var mysteryBoxAvailable = false
+
     // Zmienne dla systemu linii
     private var baseBet = 10
     private var selectedLines = 1
@@ -89,12 +101,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         R.drawable.bell
     )
     private val symbolValues = mapOf(
-        R.drawable.cherry to 2,
-        R.drawable.lemon to 3,
-        R.drawable.orange to 4,
-        R.drawable.star to 15,
-        R.drawable.seven to 50,
-        R.drawable.bell to 10
+        R.drawable.cherry to 10,
+        R.drawable.lemon to 15,
+        R.drawable.orange to 20,
+        R.drawable.star to 50,
+        R.drawable.seven to 200,
+        R.drawable.bell to 30
     )
 
     // Linie wygrywające (indeksy slotów)
@@ -181,6 +193,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setupClickListeners()
         setupLineCheckboxes()
         setupBottomNavigation()
+        initializeMysteryBox()
 
         // 7. Update UI
         updateUI()
@@ -231,6 +244,200 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
     }
+
+
+    // Inicjalizacja Mystery Box
+    private fun initializeMysteryBox() {
+        mysteryBoxHandler = Handler(Looper.getMainLooper())
+
+        // Sprawdź czy box jest dostępny przy starcie
+        checkMysteryBoxAvailability()
+
+        // Uruchom timer
+        startMysteryBoxTimer()
+
+        // Ustaw listener dla przycisku
+        binding.btnMysteryBox.setOnClickListener {
+            if (mysteryBoxAvailable) {
+                openMysteryBox()
+            } else {
+                showTimeUntilNextBox()
+            }
+        }
+
+        // Kliknięcie w timer też otwiera box
+        binding.tvMysteryBoxTimer.setOnClickListener {
+            if (mysteryBoxAvailable) {
+                openMysteryBox()
+            }
+        }
+    }
+
+    // Sprawdź dostępność boxa
+    private fun checkMysteryBoxAvailability() {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val lastOpenTime = prefs.getLong("last_mystery_box_time", 0)
+        val currentTime = System.currentTimeMillis()
+
+        mysteryBoxAvailable = (currentTime - lastOpenTime) >= MYSTERY_BOX_INTERVAL
+
+        updateMysteryBoxUI()
+    }
+
+    // Uruchom timer
+    private fun startMysteryBoxTimer() {
+        mysteryBoxRunnable = object : Runnable {
+            override fun run() {
+                updateMysteryBoxTimer()
+                mysteryBoxHandler.postDelayed(this, 1000) // Odświeżaj co sekundę
+            }
+        }
+        mysteryBoxHandler.post(mysteryBoxRunnable!!)
+    }
+
+    // Aktualizuj timer UI
+    private fun updateMysteryBoxTimer() {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val lastOpenTime = prefs.getLong("last_mystery_box_time", 0)
+        val currentTime = System.currentTimeMillis()
+        val timePassed = currentTime - lastOpenTime
+        val timeLeft = MYSTERY_BOX_INTERVAL - timePassed
+
+        runOnUiThread {
+            if (timeLeft <= 0) {
+                mysteryBoxAvailable = true
+                binding.tvMysteryBoxTimer.text = "🎁 DOSTĘPNE!"
+                binding.tvMysteryBoxTimer.setTextColor(ContextCompat.getColor(this, R.color.neon_green))
+                binding.btnMysteryBox.visibility = View.VISIBLE
+            } else {
+                mysteryBoxAvailable = false
+                val minutes = (timeLeft / 60000).toInt()
+                val seconds = ((timeLeft % 60000) / 1000).toInt()
+                binding.tvMysteryBoxTimer.text = String.format("🎁 Za: %02d:%02d", minutes, seconds)
+                binding.tvMysteryBoxTimer.setTextColor(ContextCompat.getColor(this, R.color.neon_blue))
+                binding.btnMysteryBox.visibility = View.GONE
+            }
+        }
+    }
+
+    // Aktualizuj UI boxa
+    private fun updateMysteryBoxUI() {
+        runOnUiThread {
+            if (mysteryBoxAvailable) {
+                binding.tvMysteryBoxTimer.text = "🎁 DOSTĘPNE!"
+                binding.tvMysteryBoxTimer.setTextColor(Color.GREEN)
+                binding.btnMysteryBox.visibility = View.VISIBLE
+            } else {
+                binding.btnMysteryBox.visibility = View.GONE
+            }
+        }
+    }
+
+    //  GŁÓWNA METODA: OTWÓRZ MYSTERY BOX
+    private fun openMysteryBox() {
+        if (!mysteryBoxAvailable) {
+            Toast.makeText(this, "Mystery Box nie jest jeszcze dostępny!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+
+
+        // Lista nagród
+        val prizes = listOf(50, 100, 200, 300, 400, 500)
+        val selectedPrize = prizes.random()
+
+        // Animacja otwierania
+        showMysteryBoxAnimation(selectedPrize)
+
+        // Zapisz czas otwarcia
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putLong("last_mystery_box_time", System.currentTimeMillis()).apply()
+
+        // Zaktualizuj stan
+        mysteryBoxAvailable = false
+        balance += selectedPrize
+
+        // Zapisz stan gry
+        saveGameState()
+        updateUI()
+        updateMysteryBoxUI()
+
+        // Pokaż Toast z wygraną
+        Handler(Looper.getMainLooper()).postDelayed({
+            Toast.makeText(this, "🎉 WYGRANA: $selectedPrize💰!", Toast.LENGTH_LONG).show()
+        }, 1500)
+    }
+
+    //  ANIMACJA OTWIERANIA BOXA
+    private fun showMysteryBoxAnimation(prize: Int) {
+        // Stwórz custom dialog
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_mystery_box)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.setCancelable(false)
+
+        val tvPrize = dialog.findViewById<TextView>(R.id.tvPrize)
+        val ivBox = dialog.findViewById<ImageView>(R.id.ivBox)
+
+        // Animacja pudełka
+        ivBox.animate()
+            .scaleX(1.2f)
+            .scaleY(1.2f)
+            .setDuration(500)
+            .withEndAction {
+                ivBox.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .setDuration(300)
+                    .start()
+            }
+            .start()
+
+        // Animacja tekstu
+        tvPrize.text = "?"
+        tvPrize.alpha = 0f
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            // Pokaż nagrodę
+            tvPrize.text = "$prize💰"
+            tvPrize.setTextColor(Color.parseColor("#FFD700")) // Złoty kolor
+            tvPrize.animate()
+                .alpha(1f)
+                .scaleX(1.5f)
+                .scaleY(1.5f)
+                .setDuration(1000)
+                .start()
+
+
+
+        }, 1000)
+
+        // Zamknij dialog po 3 sekundach
+        Handler(Looper.getMainLooper()).postDelayed({
+            dialog.dismiss()
+        }, 3000)
+
+        dialog.show()
+    }
+
+
+
+    // 🔽 POKAŻ CZAS DO NASTĘPNEGO BOXA
+    private fun showTimeUntilNextBox() {
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val lastOpenTime = prefs.getLong("last_mystery_box_time", 0)
+        val currentTime = System.currentTimeMillis()
+        val timePassed = currentTime - lastOpenTime
+        val timeLeft = MYSTERY_BOX_INTERVAL - timePassed
+
+        if (timeLeft > 0) {
+            val minutes = (timeLeft / 60000).toInt()
+            val seconds = ((timeLeft % 60000) / 1000).toInt()
+            Toast.makeText(this, "Następny box za $minutes min $seconds sek", Toast.LENGTH_LONG).show()
+        }
+    }
+
+
 
     private fun initializeLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -1294,9 +1501,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
     override fun onDestroy() {
         super.onDestroy()
+        mysteryBoxRunnable?.let {
+            mysteryBoxHandler.removeCallbacks(it)
+        }
         if (::spinSound.isInitialized) spinSound.release()
         if (::winSound.isInitialized) winSound.release()
+
     }
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST = 1001
     }
