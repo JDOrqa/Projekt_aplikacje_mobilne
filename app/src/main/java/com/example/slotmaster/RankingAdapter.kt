@@ -18,17 +18,15 @@ class RankingAdapter(private var rankingItems: List<RankingItem>) :
         this.rankingItems = rankedItems
         notifyDataSetChanged()
     }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RankingViewHolder {
+override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RankingViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_ranking, parent, false)
         return RankingViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: RankingViewHolder, position: Int) {
+}
+override fun onBindViewHolder(holder: RankingViewHolder, position: Int) {
         val item = rankingItems[position]
         holder.bind(item)
-
+        
         // Kolorowanie top 3 miejsc
         when (item.rank) {
             1 -> {
@@ -48,9 +46,8 @@ class RankingAdapter(private var rankingItems: List<RankingItem>) :
                 holder.tvRank.text = "#${item.rank}"
             }
         }
-    }
-
-    override fun getItemCount() = rankingItems.size
+}
+override fun getItemCount() = rankingItems.size
 
     class RankingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
@@ -66,4 +63,4 @@ class RankingAdapter(private var rankingItems: List<RankingItem>) :
 
         }
     }
-}
+    }

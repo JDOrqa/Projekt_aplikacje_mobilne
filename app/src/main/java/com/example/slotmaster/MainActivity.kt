@@ -46,6 +46,9 @@ import android.view.View
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
+    private lateinit var spinSound: MediaPlayer
+    private lateinit var winSound: MediaPlayer
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var sensorManager: SensorManager
     private var accelerometer: Sensor? = null
@@ -997,8 +1000,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             spinSound.seekTo(0)
         }
         spinSound.start()
-
-
         val totalBet = baseBet * selectedLines
 
         if (balance < totalBet) {
@@ -1121,8 +1122,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             slot.setBackgroundResource(R.drawable.slot_border_dark)
         }
     }
-
-    private fun checkWin() {
+private fun checkWin() {
         val slots = getSlotsList()
         val slotDrawables = slots.map { it.tag as? Int ?: R.drawable.cherry }
 
@@ -1173,6 +1173,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             ).show()
         }
     }
+    
 
     private fun highlightWinningLine(lineIndices: List<Int>) {
         val slots = getSlotsList()
@@ -1450,6 +1451,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     .show()
             }
         }
+
+        handler.post(slowSpinRunnable)
     }
 
     private fun formatDisplayDate(dbDate: String): String {
@@ -1513,7 +1516,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         private const val LOCATION_PERMISSION_REQUEST = 1001
     }
 }
-
+override fun onDestroy() {
+    super.onDestroy()
+    if (::spinSound.isInitialized) spinSound.release()
+    if (::winSound.isInitialized) winSound.release()
+}
 data class TargetLocation(
     val latitude: Double,
     val longitude: Double,
