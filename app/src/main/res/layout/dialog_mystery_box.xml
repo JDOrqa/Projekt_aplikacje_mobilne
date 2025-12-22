@@ -6,7 +6,17 @@
     android:background="@drawable/dialog_background"
     android:padding="20dp">
 
+<TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🎁 MYSTERY BOX"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#FF9800"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"/>
 
+    
 
 
     
