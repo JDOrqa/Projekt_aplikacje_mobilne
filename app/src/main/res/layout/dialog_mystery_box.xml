@@ -24,5 +24,17 @@
         android:src="@drawable/mystery_box"
     android:layout_centerInParent="true"/>
 
+    <TextView
+        android:id="@+id/tvPrize"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="?"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_below="@+id/ivBox"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"/>
+
     
 </RelativeLayout>
