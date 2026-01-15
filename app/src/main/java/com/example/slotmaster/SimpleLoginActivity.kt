@@ -13,7 +13,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import org.json.JSONObject
 import okhttp3.RequestBody.Companion.toRequestBody
 import android.util.Log
-import java.io.IOException
+import kotlinx.coroutines.delay
+
 
 class SimpleLoginActivity : AppCompatActivity() {
     companion object {
@@ -111,9 +112,6 @@ class SimpleLoginActivity : AppCompatActivity() {
             return
         }
 
-        // 🔽 UŻYJ FirebirdApiManager DO REJESTRACJI
-        val apiManager = FirebirdApiManager(this)
-
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 // Najpierw sprawdź czy login wolny (przez API)
@@ -134,19 +132,59 @@ class SimpleLoginActivity : AppCompatActivity() {
                     }
                 }
 
-                // 🔽 REJESTRACJA PRZEZ API
                 runOnUiThread {
                     Toast.makeText(this@SimpleLoginActivity, "Rejestracja...", Toast.LENGTH_SHORT).show()
                 }
 
-                // To wywoła createUser() w FirebirdApiManager
-                val userId = apiManager.createUser(user)
+                val registerJson = JSONObject().apply {
+                    put("username", user)
+                    put("password", pass)
+                }
 
-                // 🔽 AUTOMATYCZNE LOGOWANIE PO REJESTRACJI
-                runOnUiThread {
-                    saveLogin(user, userId)
-                    goToMain(user)
-                    Toast.makeText(this@SimpleLoginActivity, "Zarejestrowano i zalogowano!", Toast.LENGTH_LONG).show()
+                val registerRequest = Request.Builder()
+                    .url("$baseUrl/register")
+                    .post(registerJson.toString().toRequestBody("application/json".toMediaType()))
+                    .build()
+
+                val registerResponse = client.newCall(registerRequest).execute()
+                val registerBody = registerResponse.body?.string()
+
+                if (registerResponse.isSuccessful && registerBody != null) {
+                    val result = JSONObject(registerBody)
+                    if (result.optBoolean("ok", false)) {
+                        val userId = result.optString("userId", "user_$user")
+
+                        Log.d("SimpleLoginActivity", "✅ Zarejestrowano, userId: $userId")
+
+                        // 🔽 WAŻNE: NAJPIERW ZAPISZ DO SHAREDPREFERENCES
+                        saveLogin(user, userId)
+
+                        // 🔽 DODATKOWO: ZAPISZ W FirebirdApiManager (to zrobi saveLogin)
+                        // Ale dla pewności:
+                        val apiManager = FirebirdApiManager(this@SimpleLoginActivity)
+                        apiManager.setUserId(userId)
+
+                        // 🔽 DODAJ MAŁE OPÓŹNIENIE DLA PEWNOŚCI
+                        delay(200) // 100ms opóźnienia
+
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@SimpleLoginActivity,
+                                "✅ Zarejestrowano! ID: $userId",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            goToMain(user)
+                        }
+                    } else {
+                        val error = result.optString("error", "Błąd rejestracji")
+                        runOnUiThread {
+                            Toast.makeText(this@SimpleLoginActivity, error, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } else {
+                    runOnUiThread {
+                        Toast.makeText(this@SimpleLoginActivity, "Błąd serwera", Toast.LENGTH_LONG).show()
+                    }
                 }
 
             } catch (e: Exception) {
@@ -178,16 +216,30 @@ class SimpleLoginActivity : AppCompatActivity() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val finalUserId = userId ?: "user_$username"
 
+        Log.d("SimpleLoginActivity", "💾 Zapisuję login do $PREFS_NAME:")
+        Log.d("SimpleLoginActivity", "  - username: $username")
+        Log.d("SimpleLoginActivity", "  - user_id: $finalUserId")
+        Log.d("SimpleLoginActivity", "  - guest: false")
+
         prefs.edit().apply {
             putString("username", username)
-            putString("user_id", finalUserId) // 🔽 ZAPISZ user_id
+            putString("user_id", finalUserId)
             putBoolean("guest", false)
-            apply()
+            apply() // Asynchroniczny zapis
         }
 
-        // 🔽 USTAW USER_ID W FirebirdApiManager
-        val apiManager = FirebirdApiManager(this)
-        apiManager.setUserId(finalUserId)
+        // 🔽 RÓWNIEŻ ZAPISZ DO FirebirdPrefs
+        val firebirdPrefs = getSharedPreferences("FirebirdPrefs", MODE_PRIVATE)
+        firebirdPrefs.edit().putString("user_id", finalUserId).apply()
+
+        Log.d("SimpleLoginActivity", "✅ Zapisano w obu SharedPreferences")
+
+        // 🔽 DODATKOWO: Sprawdź czy zapisano
+        val savedUsername = prefs.getString("username", null)
+        val savedUserId = prefs.getString("user_id", null)
+        Log.d("SimpleLoginActivity", "🔍 Weryfikacja zapisu:")
+        Log.d("SimpleLoginActivity", "  - saved username: $savedUsername")
+        Log.d("SimpleLoginActivity", "  - saved user_id: $savedUserId")
     }
 
     private fun goToMain(username: String) {
