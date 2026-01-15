@@ -1,0 +1,30 @@
+\doxysection{Example\+Instrumented\+Test.\+kt}
+\hypertarget{_example_instrumented_test_8kt_source}{}\label{_example_instrumented_test_8kt_source}\index{app/src/androidTest/java/com/example/slotmaster/ExampleInstrumentedTest.kt@{app/src/androidTest/java/com/example/slotmaster/ExampleInstrumentedTest.kt}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00001}00001\ \textcolor{keyword}{package\ }com.example.slotmaster}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00002}00002\ }
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00003}00003\ import\ androidx.test.platform.app.InstrumentationRegistry}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00004}00004\ import\ androidx.test.ext.junit.runners.AndroidJUnit4}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00005}00005\ }
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00006}00006\ import\ org.junit.Test}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00007}00007\ import\ org.junit.runner.RunWith}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00008}00008\ }
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00009}00009\ import\ org.junit.Assert.*}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00010}00010\ \textcolor{comment}{}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00011}00011\ \textcolor{comment}{/**}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00012}00012\ \textcolor{comment}{\ *\ Instrumented\ test,\ which\ will\ execute\ on\ an\ Android\ device.}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00013}00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00014}00014\ \textcolor{comment}{\ *\ See\ [testing\ documentation](http://d.android.com/tools/testing).}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00015}00015\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00016}00016\ @RunWith(AndroidJUnit4::class)}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00017}00017\ class\ ExampleInstrumentedTest\ \{}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00018}00018\ \ \ \ \ @Test}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00019}00019\ \ \ \ \ fun\ useAppContext()\ \{}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00020}00020\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Context\ of\ the\ app\ under\ test.}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00021}00021\ \ \ \ \ \ \ \ \ val\ appContext\ =\ InstrumentationRegistry.getInstrumentation().targetContext}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00022}00022\ \ \ \ \ \ \ \ \ assertEquals("{}com.example.slotmaster"{},\ appContext.packageName)}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00023}00023\ \ \ \ \ \}}
+\DoxyCodeLine{\Hypertarget{_example_instrumented_test_8kt_source_l00024}00024\ \}}
+
+\end{DoxyCode}

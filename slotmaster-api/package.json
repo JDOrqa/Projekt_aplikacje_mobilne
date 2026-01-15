@@ -1,0 +1,17 @@
+{
+  "name": "slotmaster-api",
+  "version": "1.0.0",
+  "description": "REST API for SlotMaster app with SQLite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "tunnel": "lt --port 3000 --subdomain tangy-ducks-judge",
+    "tunnel:auto": "node tunnel-auto.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.7"
+  }
+}
