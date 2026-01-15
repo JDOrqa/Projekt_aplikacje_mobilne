@@ -267,12 +267,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // 2. SPRAWDŹ CZY ZALOGOWANY
         val isGuest = prefs.getBoolean("guest", false)
         val username = prefs.getString("username", null)
+        val user_id = prefs.getString("user_id", null)
+
+        Log.d("MainActivity", "👤 Dane logowania: user=$username, userId=$user_id, guest=$isGuest")
 
         if (!isGuest && username == null) {
+            Log.d("MainActivity", "⚠️ Brak danych logowania, przechodzę do SimpleLoginActivity")
             startActivity(Intent(this, SimpleLoginActivity::class.java))
             finish()
             return
         }
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -303,20 +308,27 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         slot9 = binding.slot9
 
         // 4. Inicjalizacja managerów - TYLKO Firebird API
+        Log.d("MainActivity", "🔧 Ustawiam userId: $user_id")
+
+        // Inicjalizuj FirebirdApiManager
         firebirdApiManager = FirebirdApiManager(this)
 
-        // 3. USTAW USER_ID W FirebirdApiManager PRZED INICJALIZACJĄ
-        val user_id = prefs.getString("user_id", null)
-        if (user_id != null) {
-            firebirdApiManager.setUserId(user_id) // 🔽 KLUCZOWE!
+        // Ustaw userId JEŚLI ISTNIEJE
+        if (user_id != null && user_id.isNotEmpty()) {
+            firebirdApiManager.setUserId(user_id)
+            Log.d("MainActivity", "✅ Ustawiono userId w FirebirdApiManager: $user_id")
+        } else {
+            Log.e("MainActivity", "❌ BRAK user_id! Używam domyślnego")
+            // Ustaw domyślny (z SharedPreferences lub nowy)
+            val defaultUserId = firebirdApiManager.getCurrentUserId()
+            Log.d("MainActivity", "🔄 Używam domyślnego userId: $defaultUserId")
         }
-
         // 5. Ładowanie danych - NAJPIERW LOKALNIE, POTEM SERWER
         loadFromSharedPreferences()  // 🔽 NAJPIERW ZAWSZE Z SHAREDPREFERENCES
 
         scope.launch {
             try {
-                firebirdApiManager.getSharedUserId()
+
                 // 🔽 POTEM SPRÓBUJ Z SERWERA
                 val serverGameState = firebirdApiManager.loadGameStateFromServer()
                 if (serverGameState != null) {
@@ -344,7 +356,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         // 7. Update UI
         updateUI()
-        Log.d("MainActivity", "🎮 Stan po onCreate: balance=$balance, spiny=$spinsCount")
+
+
+
+        Log.d("MainActivity", "🎮 Stan po onCreate: balance=$balance, spiny=$spinsCount, userId=${firebirdApiManager.getCurrentUserId()}")
+
+
     }
 
     /**
@@ -1219,6 +1236,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             // ZAPISZ aktualny stan przed przełączeniem
             saveGameState()
 
+            // 🔽 Dla systemu z logowaniem - nie przesyłaj hasła (bo to tylko nazwa usera w grze)
             val newUserId = firebirdApiManager.createUser(userName)
 
             // Ustaw nowego usera

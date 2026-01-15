@@ -31,8 +31,23 @@ class FirebirdApiManager(private val context: Context) {
     // 🔽 PUBLICZNA METODA DO USTAWIANIA USER_ID
     fun setUserId(userId: String) {
         val prefs = context.getSharedPreferences("FirebirdPrefs", Context.MODE_PRIVATE)
+        val previousId = prefs.getString("user_id", null)
+
+        Log.d(TAG, "💾 Zapisuję userId: '$userId' (poprzedni: '$previousId')")
+
+        if (userId == previousId) {
+            Log.d(TAG, "⚠️ userId nie zmienił się, pomijam zapis")
+            return
+        }
+
+        // Zapisz do FirebirdPrefs
         prefs.edit().putString("user_id", userId).apply()
-        Log.d(TAG, "💾 Zapisano nowe userId: $userId")
+
+        // 🔽 RÓWNIEŻ ZAPISZ DO GŁÓWNYCH SHAREDPREFERENCES
+        val mainPrefs = context.getSharedPreferences("SlotMasterPrefs", Context.MODE_PRIVATE)
+        mainPrefs.edit().putString("user_id", userId).apply()
+
+        Log.d(TAG, "✅ Zapisano userId w obu SharedPreferences")
     }
     private fun getUserId(): String {
         val prefs = context.getSharedPreferences("FirebirdPrefs", Context.MODE_PRIVATE)
@@ -74,6 +89,16 @@ class FirebirdApiManager(private val context: Context) {
             try {
                 Log.d(TAG, "🔗 Pobieram wspólne userId z serwera")
 
+                // 🔽 ZAMIENIĆ NA WŁASNE ID Z SHAREDPREFERENCES
+                val prefs = context.getSharedPreferences("FirebirdPrefs", Context.MODE_PRIVATE)
+                val localUserId = prefs.getString("user_id", null)
+
+                if (localUserId != null) {
+                    Log.d(TAG, "✅ Używam lokalnego userId: $localUserId")
+                    return@withContext localUserId
+                }
+
+                // Fallback: pobierz z serwera
                 val request = Request.Builder()
                     .url("$baseUrl/shared-user-id")
                     .build()
@@ -81,20 +106,17 @@ class FirebirdApiManager(private val context: Context) {
                 val response = client.newCall(request).execute()
                 val responseBody = response.body?.string()
 
-                Log.d(TAG, "Kod odpowiedzi userId: ${response.code}")
-                Log.d(TAG, "Odpowiedź userId: $responseBody")
-
                 if (response.isSuccessful) {
                     val jsonResponse = JSONObject(responseBody ?: "{}")
                     val sharedUserId = jsonResponse.optString("userId", "")
                     if (sharedUserId.isNotEmpty()) {
-                        Log.d(TAG, "✅ Ustawiam wspólne userId: $sharedUserId")
+                        Log.d(TAG, "✅ Ustawiam wspólne userId z serwera: $sharedUserId")
                         setUserId(sharedUserId)
                         return@withContext sharedUserId
                     }
                 }
 
-                // Fallback: użyj lokalnego userId
+                // Ostateczny fallback
                 getUserId()
             } catch (e: Exception) {
                 Log.e(TAG, "Błąd pobierania userId: ${e.message}")
@@ -141,13 +163,16 @@ class FirebirdApiManager(private val context: Context) {
     }
 
     // Utwórz nowego usera
-    suspend fun createUser(userName: String): String {
+    suspend fun createUser(userName: String, password: String? = null): String {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d(TAG, "🆕 Tworzę nowego usera: $userName")
+                Log.d(TAG, "🆕 Tworzę nowego usera: $userName (hasło: ${if (password != null) "TAK" else "NIE"})")
 
                 val json = JSONObject().apply {
                     put("userName", userName)
+                    if (password != null) {
+                        put("password", password)
+                    }
                 }
 
                 val request = Request.Builder()
@@ -163,17 +188,29 @@ class FirebirdApiManager(private val context: Context) {
 
                 if (response.isSuccessful) {
                     val jsonResponse = JSONObject(responseBody ?: "{}")
-                    val newUserId = jsonResponse.optString("userId", "")
-                    if (newUserId.isNotEmpty()) {
-                        setUserId(newUserId)
-                        return@withContext newUserId
+                    if (jsonResponse.has("ok") && jsonResponse.getBoolean("ok")) {
+                        val newUserId = jsonResponse.optString("userId", "")
+                        if (newUserId.isNotEmpty()) {
+                            setUserId(newUserId)
+                            return@withContext newUserId
+                        }
+                    } else if (jsonResponse.has("success") && jsonResponse.getBoolean("success")) {
+                        val newUserId = jsonResponse.optString("userId", "")
+                        if (newUserId.isNotEmpty()) {
+                            setUserId(newUserId)
+                            return@withContext newUserId
+                        }
                     }
                 }
 
-                // Fallback
-                getUserId()
+                // Fallback - utwórz lokalne ID
+                val fallbackId = if (password != null) "user_$userName" else "user_${userName}_${System.currentTimeMillis()}"
+                setUserId(fallbackId)
+                return@withContext fallbackId
+
             } catch (e: Exception) {
                 Log.e(TAG, "Błąd tworzenia usera: ${e.message}")
+                // Fallback
                 getUserId()
             }
         }

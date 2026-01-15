@@ -5,5 +5,5 @@ data class User(
     val userName: String = "",
     val lastActivity: String = "",
     val balance: Int = 0,
-    val biggestWin: Int = 0
+
 )
