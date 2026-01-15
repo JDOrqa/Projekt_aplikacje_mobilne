@@ -1,3 +1,22 @@
+/**
+ * @file MainActivity.kt
+ * @brief Główna aktywność aplikacji SlotMaster
+ * @details Zarządza głównym ekranem gry, slotami, interfejsem użytkownika,
+ *          sensorami, lokalizacją, systemem użytkowników i integracją z API.
+ * @author Twórca aplikacji
+ * @date 2024
+ * @version 1.0
+ * 
+ * @section features Funkcje
+ * - System automatycznego zapisu/odczytu stanu gry
+ * - Integracja z Firebird API
+ * - System linii wygrywających
+ * - Mystery Box z timerem
+ * - Zarządzanie wieloma użytkownikami
+ * - Wykrywanie potrząśnięcia do kręcenia
+ * - Automatyczna zmiana motywu w zależności od światła
+ * - System lokalizacji z nagrodami
+ */
 package com.example.slotmaster
 
 import android.Manifest
@@ -44,57 +63,151 @@ import android.view.View
 
 
 
+/**
+ * @class MainActivity
+ * @extends AppCompatActivity
+ * @implements SensorEventListener
+ * @brief Główna aktywność aplikacji, zarządza całą logiką gry
+ * 
+ * @property binding Powiązanie widoku (ViewBinding)
+ * @property sensorManager Manager sensorów Android
+ * @property accelerometer Akcelerometr do wykrywania potrząśnięć
+ * @property lightSensor Czujnik światła do automatycznego motywu
+ * @property fusedLocationClient Klient lokalizacji Google
+ * @property locationCallback Callback dla aktualizacji lokalizacji
+ * @property spinSound Dźwięk kręcenia slotów
+ * @property winSound Dźwięk wygranej
+ * @property balance Aktualne saldo gracza
+ * @property lastShakeTime Ostatni czas potrząśnięcia
+ * @property SHAKE_THRESHOLD Próg wykrywania potrząśnięcia
+ * @property SHAKE_TIMEOUT Minimalny czas między potrząśnięciami
+ * @property KEY_DARK_MODE Klucz do zapisu trybu ciemnego
+ * @property firebirdApiManager Manager połączenia z Firebird API
+ * @property spinsCount Liczba wykonanych spinów
+ * @property biggestWin Największa wygrana w historii
+ * @property scope Coroutine scope dla operacji asynchronicznych
+ * @property slot1-slot9 Referencje do ImageView slotów
+ * @property MYSTERY_BOX_INTERVAL Interwał między dostępnością Mystery Box
+ * @property mysteryBoxHandler Handler dla timera Mystery Box
+ * @property mysteryBoxRunnable Runnable dla timera Mystery Box
+ * @property mysteryBoxAvailable Czy Mystery Box jest dostępny
+ * @property baseBet Bazowy zakład na linię
+ * @property selectedLines Liczba wybranych linii
+ * @property symbols Lista dostępnych symboli
+ * @property symbolValues Wartości symboli
+ * @property winningLines Definicje linii wygrywających
+ * @property targetLocations Lista lokalizacji do odwiedzenia
+ * @property PREFS_NAME Nazwa pliku preferencji
+ */
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
-    private lateinit var spinSound: MediaPlayer
-    private lateinit var winSound: MediaPlayer
-
+    /** @brief Powiązanie widoku aktywności */
     private lateinit var binding: ActivityMainBinding
+    
+    /** @brief Manager sensorów Android */
     private lateinit var sensorManager: SensorManager
+    
+    /** @brief Sensor akcelerometru do wykrywania potrząśnięć */
     private var accelerometer: Sensor? = null
+    
+    /** @brief Sensor światła do automatycznej zmiany motywu */
     private var lightSensor: Sensor? = null
+    
+    /** @brief Klient lokalizacji Google */
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    
+    /** @brief Callback dla aktualizacji lokalizacji */
     private lateinit var locationCallback: LocationCallback
 
+    /** @brief Dźwięk odtwarzany podczas kręcenia slotów */
     private lateinit var spinSound: MediaPlayer
 
+    /** @brief Dźwięk odtwarzany przy wygranej */
     private lateinit var winSound: MediaPlayer
 
 
+    /** @brief Aktualne saldo punktów gracza */
     private var balance: Int = 5000
+    
+    /** @brief Ostatni czas zarejestrowanego potrząśnięcia */
     private var lastShakeTime: Long = 0
-    private val SHAKE_THRESHOLD = 15f
+    
+    /** @brief Próg przyspieszenia dla wykrycia potrząśnięcia */
+    private val SHAKE_THRESHOLD = 20f
+    
+    /** @brief Minimalny czas między potrząśnięciami (ms) */
     private val SHAKE_TIMEOUT = 1000
+    
+    /** @brief Klucz do zapisu stanu trybu ciemnego w SharedPreferences */
     private val KEY_DARK_MODE = "dark_mode"
 
     // Zmienne do bazy danych - TYLKO Firebird API
+    
+    /** @brief Manager do komunikacji z Firebird API */
     private lateinit var firebirdApiManager: FirebirdApiManager
+    
+    /** @brief Całkowita liczba wykonanych spinów */
     private var spinsCount = 0
+    
+    /** @brief Największa wygrana w historii gry */
     private var biggestWin = 0
 
     // Coroutine scope dla operacji sieciowych
+    
+    /** @brief Scope dla coroutines na głównym wątku */
     private val scope = CoroutineScope(Dispatchers.Main)
 
     // Sloty jako ImageView
+    
+    /** @brief ImageView dla slotu 1 (górny lewy) */
     private lateinit var slot1: ImageView
+    
+    /** @brief ImageView dla slotu 2 (górny środkowy) */
     private lateinit var slot2: ImageView
+    
+    /** @brief ImageView dla slotu 3 (górny prawy) */
     private lateinit var slot3: ImageView
+    
+    /** @brief ImageView dla slotu 4 (środkowy lewy) */
     private lateinit var slot4: ImageView
+    
+    /** @brief ImageView dla slotu 5 (środkowy środkowy) */
     private lateinit var slot5: ImageView
+    
+    /** @brief ImageView dla slotu 6 (środkowy prawy) */
     private lateinit var slot6: ImageView
+    
+    /** @brief ImageView dla slotu 7 (dolny lewy) */
     private lateinit var slot7: ImageView
+    
+    /** @brief ImageView dla slotu 8 (dolny środkowy) */
     private lateinit var slot8: ImageView
+    
+    /** @brief ImageView dla slotu 9 (dolny prawy) */
     private lateinit var slot9: ImageView
 
 
+    /** @brief Interwał czasowy między dostępnością Mystery Box (5 minut) */
     private val MYSTERY_BOX_INTERVAL = 5 * 60 * 1000L // 5 minut w milisekundach
+    
+    /** @brief Handler do zarządzania timerem Mystery Box */
     private lateinit var mysteryBoxHandler: Handler
+    
+    /** @brief Runnable dla cyklicznego odświeżania timera Mystery Box */
     private var mysteryBoxRunnable: Runnable? = null
+    
+    /** @brief Flaga dostępności Mystery Box */
     private var mysteryBoxAvailable = false
 
     // Zmienne dla systemu linii
+    
+    /** @brief Bazowa stawka zakładu na jedną linię */
     private var baseBet = 10
+    
+    /** @brief Liczba wybranych linii do obstawienia */
     private var selectedLines = 1
+    
+    /** @brief Lista identyfikatorów zasobów symboli */
     private val symbols = listOf(
         R.drawable.cherry,
         R.drawable.lemon,
@@ -103,6 +216,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         R.drawable.seven,
         R.drawable.bell
     )
+    
+    /** @brief Mapa wartości punktowych symboli */
     private val symbolValues = mapOf(
         R.drawable.cherry to 10,
         R.drawable.lemon to 15,
@@ -113,6 +228,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     )
 
     // Linie wygrywające (indeksy slotów)
+    
+    /** @brief Lista definicji linii wygrywających jako indeksy slotów */
     private val winningLines = listOf(
         listOf(0, 1, 2),  // Linia 1 - górny wiersz
         listOf(3, 4, 5),  // Linia 2 - środkowy wiersz
@@ -121,14 +238,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         listOf(2, 4, 6)   // Linia 5 - przekątna /
     )
 
+    /** @brief Lista lokalizacji docelowych do odwiedzenia */
     private val targetLocations = listOf(
         TargetLocation(49.6092, 20.7045, 100.0, false), // ANS
         TargetLocation(49.6251, 20.6912, 150.0, false), // Rynek
         TargetLocation(49.6092, 20.7134, 100.0, false) // Lidl lukasinskiego
     )
 
+    /** @brief Nazwa pliku SharedPreferences */
     private val PREFS_NAME = "SlotMasterPrefs"
 
+    /**
+     * @brief Metoda cyklu życia onCreate - inicjalizacja aktywności
+     * @param savedInstanceState Zapisany stan instancji
+     * @details Inicjalizuje UI, sensory, lokalizację, API i ładuje stan gry
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
@@ -140,9 +264,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             if (darkMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
 
-        // 2. Binding INICJALIZACJA - TO MUSI BYĆ NAJPIERW!
+        // 2. SPRAWDŹ CZY ZALOGOWANY
+        val isGuest = prefs.getBoolean("guest", false)
+        val username = prefs.getString("username", null)
+
+        if (!isGuest && username == null) {
+            startActivity(Intent(this, SimpleLoginActivity::class.java))
+            finish()
+            return
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+
+
+        // 2. Binding INICJALIZACJA - TO MUSI BYĆ NAJPIERW!
+
 
         // dźwięki
         spinSound = MediaPlayer.create(this, R.raw.spin)
@@ -166,6 +304,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         // 4. Inicjalizacja managerów - TYLKO Firebird API
         firebirdApiManager = FirebirdApiManager(this)
+
+        // 3. USTAW USER_ID W FirebirdApiManager PRZED INICJALIZACJĄ
+        val user_id = prefs.getString("user_id", null)
+        if (user_id != null) {
+            firebirdApiManager.setUserId(user_id) // 🔽 KLUCZOWE!
+        }
 
         // 5. Ładowanie danych - NAJPIERW LOKALNIE, POTEM SERWER
         loadFromSharedPreferences()  // 🔽 NAJPIERW ZAWSZE Z SHAREDPREFERENCES
@@ -203,6 +347,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("MainActivity", "🎮 Stan po onCreate: balance=$balance, spiny=$spinsCount")
     }
 
+    /**
+     * @brief Inicjalizuje sensory (akcelerometr i czujnik światła)
+     * @details Rejestruje listenery dla dostępnych sensorów
+     * @post sensory są aktywne i nasłuchują zmian
+     */
     private fun initializeSensors() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
@@ -222,6 +371,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Testuje połączenie z API Firebird
+     * @details Wykonuje testy połączenia i zapisu danych
+     * @post Wyświetla Toast z wynikiem testu
+     */
     private fun testApiConnection() {
         scope.launch {
             Log.d("MainActivity", "🧪 Rozpoczynam test API...")
@@ -250,6 +404,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
     // Inicjalizacja Mystery Box
+    
+    /**
+     * @brief Inicjalizuje system Mystery Box
+     * @details Ustawia timer, handler i listenery dla Mystery Box
+     * @post Mystery Box jest gotowy do użycia
+     */
     private fun initializeMysteryBox() {
         mysteryBoxHandler = Handler(Looper.getMainLooper())
 
@@ -276,7 +436,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    // Sprawdź dostępność boxa
+    /**
+     * @brief Sprawdza dostępność Mystery Box
+     * @details Porównuje czas od ostatniego otwarcia z interwałem
+     * @post Ustawia flagę mysteryBoxAvailable i aktualizuje UI
+     */
     private fun checkMysteryBoxAvailability() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val lastOpenTime = prefs.getLong("last_mystery_box_time", 0)
@@ -287,7 +451,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         updateMysteryBoxUI()
     }
 
-    // Uruchom timer
+    /**
+     * @brief Uruchamia timer odliczający do następnego Mystery Box
+     * @post Timer jest aktywny i odświeża UI co sekundę
+     */
     private fun startMysteryBoxTimer() {
         mysteryBoxRunnable = object : Runnable {
             override fun run() {
@@ -298,7 +465,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         mysteryBoxHandler.post(mysteryBoxRunnable!!)
     }
 
-    // Aktualizuj timer UI
+    /**
+     * @brief Aktualizuje wyświetlacz timera Mystery Box
+     * @details Oblicza pozostały czas i formatuje go do wyświetlenia
+     * @post UI timera jest zaktualizowany
+     */
     private fun updateMysteryBoxTimer() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val lastOpenTime = prefs.getLong("last_mystery_box_time", 0)
@@ -323,7 +494,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    // Aktualizuj UI boxa
+    /**
+     * @brief Aktualizuje interfejs użytkownika Mystery Box
+     * @post Przycisk i timer są odpowiednio pokazywane/ukrywane
+     */
     private fun updateMysteryBoxUI() {
         runOnUiThread {
             if (mysteryBoxAvailable) {
@@ -336,7 +510,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    //  GŁÓWNA METODA: OTWÓRZ MYSTERY BOX
+    /**
+     * @brief GŁÓWNA METODA: Otwiera Mystery Box
+     * @details Losuje nagrodę, odtwarza animację i dodaje punkty
+     * @pre mysteryBoxAvailable == true
+     * @post Nagroda dodana do salda, czas otwarcia zapisany, box niedostępny
+     * @throws Toast jeśli box nie jest dostępny
+     */
     private fun openMysteryBox() {
         if (!mysteryBoxAvailable) {
             Toast.makeText(this, "Mystery Box nie jest jeszcze dostępny!", Toast.LENGTH_SHORT).show()
@@ -371,7 +551,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }, 1500)
     }
 
-    //  ANIMACJA OTWIERANIA BOXA
+    /**
+     * @brief Wyświetla animację otwierania Mystery Box
+     * @param prize Wartość wylosowanej nagrody
+     * @details Tworzy dialog z animacją pudełka i wyświetla nagrodę
+     * @post Dialog z animacją jest pokazany na 3 sekundy
+     */
     private fun showMysteryBoxAnimation(prize: Int) {
         // Stwórz custom dialog
         val dialog = Dialog(this)
@@ -425,7 +610,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
 
-    // 🔽 POKAŻ CZAS DO NASTĘPNEGO BOXA
+    /**
+     * @brief Pokazuje czas do następnego dostępnego Mystery Box
+     * @details Oblicza pozostały czas i wyświetla go w Toast
+     * @post Toast z informacją o czasie oczekiwania
+     */
     private fun showTimeUntilNextBox() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val lastOpenTime = prefs.getLong("last_mystery_box_time", 0)
@@ -442,6 +631,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
 
+    /**
+     * @brief Inicjalizuje system lokalizacji
+     * @details Konfiguruje FusedLocationProvider i callback
+     * @post System lokalizacji jest gotowy do użycia
+     */
     private fun initializeLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -456,6 +650,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         startLocationUpdates()
     }
 
+    /**
+     * @brief Konfiguruje dolne menu nawigacyjne
+     * @details Ustawia listenery dla poszczególnych ikon menu
+     * @post Menu reaguje na kliknięcia
+     */
     private fun setupBottomNavigation() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -480,26 +679,32 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    // Nowa metoda do zarządzania userami
+    /**
+     * @brief Wyświetla dialog zarządzania użytkownikami
+     * @details Pokazuje opcje: wybór użytkownika, nowy użytkownik, aktualny użytkownik
+     * @post Dialog z opcjami zarządzania użytkownikami
+     */
     private fun showUserManagementDialog() {
-        val options = arrayOf("👥 Wybierz Usera", "🆕 Nowy User", "👤 Aktualny User")
+        val options = arrayOf("👤 Aktualny User")
 
         AlertDialog.Builder(this)
             .setTitle("👨‍💼 Zarządzanie Userami")
             .setItems(options) { dialog, which ->
                 when (which) {
-                    0 -> showUserSelection()
-                    1 -> showCreateUserDialog()
-                    2 -> showCurrentUserInfo()
+                    0 -> showCurrentUserInfo()
                 }
             }
             .setNegativeButton("Anuluj", null)
             .show()
     }
 
-    // Nowa metoda z dodatkowymi opcjami
+    /**
+     * @brief Wyświetla dialog z dodatkowymi opcjami
+     * @details Pokazuje opcje: test API, historia, reset gry, informacje, ranking
+     * @post Dialog z rozszerzonymi opcjami aplikacji
+     */
     private fun showMoreOptionsDialog() {
-        val options = arrayOf("🔧 Test API", "📊 Historia", "🔄 Reset Gry", "ℹ️ Informacje", "🏆 Ranking graczy")
+        val options = arrayOf("🔧 Test API", "📊 Historia", "🔄 Reset Gry", "ℹ️ Informacje", "🏆 Ranking graczy", "Wyloguj się")
 
         AlertDialog.Builder(this)
             .setTitle("⚙️ Więcej Opcji")
@@ -510,16 +715,52 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     2 -> resetGame()
                     3 -> showGameInfoDialog()
                     4 -> showRanking()
+                    5 -> showLogoutDialog()
                 }
             }
             .setNegativeButton("Anuluj", null)
             .show()
     }
+    
+    /**
+     * @brief Otwiera aktywność rankingu graczy
+     * @post Przejście do RankingActivity
+     */
+
+
+
     private fun showRanking() {
 
         val intent = Intent(this, RankingActivity::class.java)
         startActivity(intent)
     }
+    fun logout(view: View) { // 🔽 DLA onClick Z XML
+        showLogoutDialog()
+    }
+
+    private fun showLogoutDialog() { // 🔽 DLA WYWOŁANIA Z KODU
+        AlertDialog.Builder(this)
+            .setTitle("Wylogowanie")
+            .setMessage("Czy na pewno chcesz się wylogować?")
+            .setPositiveButton("Tak") { dialog, _ ->
+                // Usuń dane logowania
+                val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                prefs.edit().remove("username").remove("guest").apply()
+
+                // Wróć do ekranu logowania
+                startActivity(Intent(this, SimpleLoginActivity::class.java))
+                finish()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Nie", null)
+            .show()
+    }
+    /**
+     * @brief Uruchamia aktualizacje lokalizacji
+     * @details Sprawdza uprawnienia i konfiguruje requesty lokalizacji
+     * @post Lokalizacja jest regularnie aktualizowana
+     * @throws Request uprawnień jeśli nie są nadane
+     */
     private fun startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -554,6 +795,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         )
     }
 
+    /**
+     * @brief Sprawdza czy gracz jest w pobliżu lokalizacji docelowych
+     * @param currentLocation Aktualna lokalizacja gracza
+     * @details Jeśli gracz jest w zasięgu nieodwiedzonej lokalizacji,
+     *          dodaje 100 punktów do salda i oznacza jako odwiedzoną
+     * @see TargetLocation
+     * @see balance
+     * @post Punkty dodane, lokalizacja oznaczona jako odwiedzona
+     */
     private fun checkLocationRewards(currentLocation: Location) {
         targetLocations.forEachIndexed { index, target ->
             if (!target.visited) {
@@ -582,6 +832,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Wyświetla dialog z informacjami o grze
+     * @post Dialog z opisem gry jest pokazany
+     */
     private fun showGameInfoDialog() {
         val dialog = android.app.AlertDialog.Builder(this)
             .setTitle(getString(R.string.game_info_title))
@@ -594,6 +848,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         dialog.show()
     }
 
+    /**
+     * @brief Konfiguruje listenery dla przycisków
+     * @details Ustawia kliknięcia dla spin, info, mapa i checkboxów linii
+     * @post Wszystkie przyciski reagują na kliknięcia
+     */
     private fun setupClickListeners() {
         binding.btnSpin.setOnClickListener {
             spinSlots()
@@ -615,6 +874,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Konfiguruje checkboxy linii
+     * @details Ustawia tekst i stan początkowy dla checkboxów
+     * @post Checkboxy są gotowe do użycia
+     */
     private fun setupLineCheckboxes() {
         getLineCheckboxesList().forEachIndexed { index, checkbox ->
             checkbox.text = "Linia ${index + 1}"
@@ -622,17 +886,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         updateSelectedLines()
     }
 
+    /**
+     * @brief Zwraca listę checkboxów linii
+     * @return Lista CheckBox dla linii 1-5
+     */
     private fun getLineCheckboxesList() = listOf(
         binding.cbLine1, binding.cbLine2, binding.cbLine3,
         binding.cbLine4, binding.cbLine5
     )
 
+    /**
+     * @brief Zwraca listę slotów ImageView
+     * @return Lista ImageView w kolejności od slot1 do slot9
+     */
     private fun getSlotsList() = listOf(
         slot1, slot2, slot3,
         slot4, slot5, slot6,
         slot7, slot8, slot9
     )
 
+    /**
+     * @brief Aktualizuje liczbę wybranych linii
+     * @details Zlicza zaznaczone checkboxy, minimum 1 linia
+     * @post selectedLines jest zaktualizowane, UI odświeżone
+     */
     private fun updateSelectedLines() {
         val lineCheckboxes = getLineCheckboxesList()
         selectedLines = lineCheckboxes.count { it.isChecked }
@@ -643,11 +920,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         updateBetInfo()
     }
 
+    /**
+     * @brief Aktualizuje informację o zakładzie
+     * @post Tekst z stawką i liczbą linii jest zaktualizowany
+     */
     private fun updateBetInfo() {
         val totalBet = baseBet * selectedLines
         binding.tvBetInfo.text = "Stawka: $totalBet punktów ($selectedLines linii)"
     }
 
+    /**
+     * @brief Wyświetla informacje o aktualnym użytkowniku
+     * @details Pokazuje ID i nazwę aktualnie zalogowanego użytkownika
+     * @post Dialog z informacjami użytkownika
+     */
     private fun showCurrentUserInfo() {
         scope.launch {
             val userId = firebirdApiManager.getCurrentUserId()
@@ -658,15 +944,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     .setTitle("👤 Aktualny User")
                     .setMessage("User ID: $userId\nNazwa: $userName")
                     .setPositiveButton("OK", null)
-                    .setNeutralButton("Zmień usera") { dialog, _ ->
-                        showUserSelection()
-                        dialog.dismiss()
-                    }
                     .show()
             }
         }
     }
 
+    /**
+     * @brief Otwiera aktywność mapy
+     * @details Przekazuje aktualną lokalizację i stan odwiedzonych miejsc
+     * @post Przejście do MapActivity z danymi
+     * @throws Toast jeśli brak uprawnień lokalizacji
+     */
     private fun showMap() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED) {
@@ -692,7 +980,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    // Metoda: Wybór usera z listy
+    /**
+     * @brief Wyświetla dialog wyboru użytkownika z listy
+     * @details Pobiera listę użytkowników z serwera i pokazuje w dialogu
+     * @post Dialog z listą użytkowników do wyboru
+     */
     private fun showUserSelection() {
         scope.launch {
             val users = firebirdApiManager.getUsers()
@@ -744,7 +1036,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    // Metoda: Tworzenie nowego usera
+    /**
+     * @brief Wyświetla dialog tworzenia nowego użytkownika
+     * @post Dialog z polem tekstowym do wprowadzenia nazwy użytkownika
+     */
     private fun showCreateUserDialog() {
         val input = EditText(this)
         input.hint = "Wprowadź nazwę usera"
@@ -765,7 +1060,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             .show()
     }
 
-    // Metoda: Przełącz na innego usera
+    /**
+     * @brief Przełącza na innego użytkownika
+     * @param newUserId ID użytkownika do przełączenia
+     * @details Zapisuje aktualny stan, zmienia użytkownika i ładuje jego stan
+     * @post Użytkownik zmieniony, stan załadowany z serwera
+     */
     private fun switchUser(newUserId: String) {
         scope.launch {
             try {
@@ -801,7 +1101,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    // 🔽 NOWA METODA: Załaduj stan z serwera
+    /**
+     * @brief Załaduj stan gry z serwera i zastosuj lokalnie
+     * @param gameState Stan gry pobrany z serwera
+     * @details Aktualizuje wszystkie zmienne gry na podstawie danych z serwera
+     * @post Lokalny stan gry jest identyczny z serwerowym
+     */
     private fun applyGameStateFromServer(gameState: GameState) {
         // Aktualizuj dane z serwera
         balance = gameState.balance
@@ -827,7 +1132,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("MainActivity", "🎮 Załadowano stan z serwera: balance=$balance, lines=$selectedLines")
     }
 
-    // 🔽 METODA: Załaduj z SharedPreferences
+    /**
+     * @brief Załaduj stan gry z SharedPreferences
+     * @details Ładuje wszystkie zapisane wartości z lokalnego storage
+     * @post Zmienne gry są zainicjalizowane wartościami z SharedPreferences
+     */
     private fun loadFromSharedPreferences() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -851,7 +1160,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("MainActivity", "📱 Załadowano z SharedPreferences: balance=$balance, spiny=$spinsCount")
     }
 
-    // 🔽 METODA: Zapisz do SharedPreferences
+    /**
+     * @brief Zapisz stan gry do SharedPreferences
+     * @details Zapisuje wszystkie aktualne wartości zmiennych gry
+     * @post Stan gry jest zapisany lokalnie
+     */
     private fun saveToSharedPreferences() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().apply {
@@ -871,6 +1184,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("MainActivity", "💾 Zapisano do SharedPreferences: balance=$balance")
     }
 
+    /**
+     * @brief Resetuje stan gry do wartości domyślnych
+     * @details Ustawia początkowe wartości dla nowego użytkownika
+     * @post Wszystkie liczniki zresetowane, saldo ustawione na 5000
+     */
     private fun resetToDefaultState() {
         // 🔽 UŻYWAJ TYLKO DO RĘCZNEGO RESETU GRY LUB NOWEGO USERA!
         balance = 5000
@@ -890,7 +1208,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         Log.d("MainActivity", "🔄 Ręczny reset gry do wartości domyślnych")
     }
 
-    // Metoda: Utwórz nowego usera
+    /**
+     * @brief Tworzy nowego użytkownika
+     * @param userName Nazwa nowego użytkownika
+     * @details Zapisuje aktualny stan, tworzy użytkownika na serwerze, resetuje stan
+     * @post Nowy użytkownik utworzony, stan zresetowany
+     */
     private fun createNewUser(userName: String) {
         scope.launch {
             // ZAPISZ aktualny stan przed przełączeniem
@@ -914,7 +1237,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    // Pomocnicza funkcja do wyodrębniania nazwy z ID
+    /**
+     * @brief Wyodrębnia nazwę użytkownika z ID
+     * @param userId ID użytkownika w formacie "user_[nazwa]"
+     * @return Sformatowana nazwa użytkownika
+     */
     private fun extractUserNameFromId(userId: String): String {
         return if (userId.startsWith("user_") && userId.contains("_")) {
             val parts = userId.split("_")
@@ -930,6 +1257,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Callback zmiany wartości sensora
+     * @param event Zdarzenie sensora z danymi
+     * @details Rozdziela obsługę na akcelerometr i czujnik światła
+     * @see handleAccelerometer
+     * @see handleLightSensor
+     */
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let { sensorEvent ->
             when (sensorEvent.sensor.type) {
@@ -943,6 +1277,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Obsługuje dane z akcelerometru
+     * @param values Tablica wartości przyspieszenia [x, y, z]
+     * @details Wykrywa potrząśnięcia i uruchamia spinSlots() przy przekroczeniu progu
+     */
     private fun handleAccelerometer(values: FloatArray) {
         val x = values[0]
         val y = values[1]
@@ -961,6 +1300,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Obsługuje dane z czujnika światła
+     * @param lightValue Wartość natężenia światła w lux
+     * @details Automatycznie zmienia motyw aplikacji w zależności od światła
+     * @post Motyw zmieniony na jasny/ciemny, UI zaktualizowany
+     */
     private fun handleLightSensor(lightValue: Float) {
         runOnUiThread {
             val turnDarkThreshold = 15f
@@ -992,6 +1337,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Główna metoda kręcenia slotami
+     * @details Sprawdza saldo, odtwarza dźwięk, wykonuje animację i sprawdza wygraną
+     * @pre balance >= totalBet
+     * @post Sloty zakręcone, saldo pomniejszone, wygrana sprawdzona
+     * @throws Toast jeśli za mało punktów
+     */
     private fun spinSlots() {
 
         // 🔽 SPRAWDŹ NOWY DZIEŃ PRZED KAŻDYM SPINEM
@@ -1000,6 +1352,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             spinSound.seekTo(0)
         }
         spinSound.start()
+
+
         val totalBet = baseBet * selectedLines
 
         if (balance < totalBet) {
@@ -1059,6 +1413,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         handler.post(fastSpinRunnable)
     }
 
+    /**
+     * @brief Stosuje efekty wizualne podczas kręcenia
+     * @param slots Lista slotów do animacji
+     * @post Sloty mają zastosowane efekty przezroczystości i skali
+     */
     private fun applySpinEffects(slots: List<ImageView>) {
         slots.forEach { slot ->
             slot.animate()
@@ -1070,6 +1429,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+    /**
+     * @brief Rozpoczyna fazę powolnego kręcenia slotów
+     * @param Handler do zarządzania animacjami
+     * @details Stopniowo zatrzymuje sloty z efektami wizualnymi
+     * @post Sloty pokazują finalne wyniki
+     */
     private fun startSlowSpinPhase(handler: Handler) {
         val slots = getSlotsList()
         val finalResults = mutableListOf<Int>()
@@ -1112,6 +1477,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         handler.post(slowSpinRunnable)
     }
 
+    /**
+     * @brief Resetuje wszystkie sloty po zakręceniu
+     * @post Sloty mają domyślny wygląd
+     */
     private fun resetAllSlotsAfterSpin() {
         val slots = getSlotsList()
         slots.forEach { slot ->
@@ -1122,7 +1491,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             slot.setBackgroundResource(R.drawable.slot_border_dark)
         }
     }
-private fun checkWin() {
+
+    /**
+     * @brief Sprawdza wygrane linie po zakręceniu
+     * @details Analizuje ułożenie symboli na aktywnych liniach
+     * @post Wygrane dodane do salda, największa wygrana zaktualizowana
+     */
+    private fun checkWin() {
         val slots = getSlotsList()
         val slotDrawables = slots.map { it.tag as? Int ?: R.drawable.cherry }
 
@@ -1173,8 +1548,12 @@ private fun checkWin() {
             ).show()
         }
     }
-    
 
+    /**
+     * @brief Podświetla wygrywającą linię
+     * @param lineIndices Lista indeksów slotów w linii
+     * @post Sloty w linii migają i są podświetlone
+     */
     private fun highlightWinningLine(lineIndices: List<Int>) {
         val slots = getSlotsList()
 
@@ -1223,6 +1602,11 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Resetuje całą grę do stanu początkowego
+     * @details Zapisuje aktualny stan, resetuje liczniki, zachowuje saldo
+     * @post Gra zresetowana, Toast potwierdzający
+     */
     private fun resetGame() {
         scope.launch {
             // ZAPISZ STAN PRZED RESETEM
@@ -1241,6 +1625,11 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Aktualizuje interfejs użytkownika
+     * @details Odświeża wyświetlacz salda, informacji o zakładzie i stanu lokalizacji
+     * @post Wszystkie elementy UI są aktualne
+     */
     private fun updateUI() {
         binding.tvBalance.text = "Saldo: $balance"
         updateBetInfo()
@@ -1253,7 +1642,11 @@ private fun checkWin() {
         binding.tvLocationInfo.text = "Odwiedzone lokacje: $visitedCount/${targetLocations.size}"
     }
 
-    // METODA: Aktualizuj wynik w Firebird API
+    /**
+     * @brief Aktualizuje wynik dnia w bazie danych Firebird
+     * @details Wysyła aktualne statystyki gry na serwer
+     * @post Dane zsynchronizowane z serwerem (jeśli połączenie)
+     */
     private fun updateDailyResultInDatabase() {
         scope.launch {
             try {
@@ -1275,6 +1668,11 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Zapisuje stan gry lokalnie i na serwerze
+     * @details Synchronizuje wszystkie dane gry
+     * @post Stan zapisany w SharedPreferences i na serwerze (jeśli połączenie)
+     */
     private fun saveGameState() {
         // 🔽 ZAWSZE ZAPISUJ DO SHAREDPREFERENCES
         saveToSharedPreferences()
@@ -1299,8 +1697,20 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Callback zmiany dokładności sensora
+     * @param sensor Sensor którego dokładność się zmieniła
+     * @param accuracy Nowa dokładność sensora
+     */
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
+    /**
+     * @brief Obsługuje wynik żądania uprawnień
+     * @param requestCode Kod żądania
+     * @param permissions Tablica żądanych uprawnień
+     * @param grantResults Tablica wyników przyznania uprawnień
+     * @post Jeśli przyznano uprawnienia lokalizacji, uruchamia jej aktualizacje
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -1314,6 +1724,11 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Metoda cyklu życia onResume
+     * @details Wznawia nasłuchiwanie sensorów, lokalizację i sprawdza nowy dzień
+     * @post Aplikacja aktywna, wszystkie systemy działają
+     */
     override fun onResume() {
         super.onResume()
         accelerometer?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
@@ -1326,6 +1741,11 @@ private fun checkWin() {
         Log.d("MainActivity", "🔄 onResume - stan: balance=$balance")
     }
 
+    /**
+     * @brief Metoda cyklu życia onPause
+     * @details Zatrzymuje sensory, lokalizację i zapisuje stan gry
+     * @post Stan gry zapisany, zasoby zwolnione
+     */
     override fun onPause() {
         super.onPause()
         sensorManager.unregisterListener(this)
@@ -1340,7 +1760,12 @@ private fun checkWin() {
         Log.d("MainActivity", "⏸️ onPause - zapisano: balance=$balance")
     }
 
-    // METODY DLA FIREBIRD API
+    /**
+     * @brief Zapisuje wynik dnia jeśli potrzeba
+     * @param forceSave Wymusza zapis nawet jeśli już zapisano dzisiaj
+     * @details Sprawdza czy dzisiejszy wynik jest już zapisany
+     * @post Wynik dnia zapisany na serwerze (jeśli potrzeba i połączenie)
+     */
     private fun saveDailyResultIfNeeded(forceSave: Boolean = false) {
         scope.launch {
             // SPRAWDŹ CZY TO NOWY DZIEŃ PRZED ZAPISEM
@@ -1367,6 +1792,12 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Sprawdza i obsługuje zmianę dnia
+     * @return true jeśli wykryto nowy dzień, false w przeciwnym razie
+     * @details Resetuje liczniki przy zmianie dnia, zachowuje saldo
+     * @post Jeśli nowy dzień, liczniki zresetowane, poprzedni dzień zapisany
+     */
     private fun checkAndHandleNewDay(): Boolean {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val lastSaveDate = prefs.getString("lastSaveDate", "")
@@ -1410,14 +1841,27 @@ private fun checkWin() {
         return false
     }
 
+    /**
+     * @brief Pobiera bieżącą datę w formacie YYYY-MM-DD
+     * @return String z datą
+     */
     private fun getCurrentDate(): String {
         return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
     }
 
+    /**
+     * @brief Sprawdza i zapisuje wynik poprzedniego dnia
+     * @details Upewnia się że dane z wczoraj są zapisane
+     */
     private fun checkAndSavePreviousDay() {
         saveDailyResultIfNeeded()
     }
 
+    /**
+     * @brief Wyświetla historię gier z ostatnich 7 dni
+     * @details Pobiera dane z serwera i formatuje do czytelnej postaci
+     * @post Dialog z historią gier
+     */
     private fun showHistory() {
         scope.launch {
             val history = firebirdApiManager.getRecentHistory(7)
@@ -1451,10 +1895,13 @@ private fun checkWin() {
                     .show()
             }
         }
-
-        handler.post(slowSpinRunnable)
     }
 
+    /**
+     * @brief Formatuje datę z bazy danych do wyświetlenia
+     * @param dbDate Data w formacie YYYY-MM-DD
+     * @return Data w formacie DD.MM.YYYY
+     */
     private fun formatDisplayDate(dbDate: String): String {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -1466,6 +1913,11 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Formatuje czas z pełnego timestampu do formatu HH:mm
+     * @param dateTime Pełny timestamp w formacie YYYY-MM-DD HH:mm:ss
+     * @return Czas w formacie HH:mm
+     */
     private fun formatTime(dateTime: String): String {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -1477,6 +1929,10 @@ private fun checkWin() {
         }
     }
 
+    /**
+     * @brief Wyświetla potwierdzenie czyszczenia historii
+     * @post Dialog z potwierdzeniem usunięcia historii
+     */
     private fun showClearHistoryConfirmation() {
         android.app.AlertDialog.Builder(this)
             .setTitle("🧹 Wyczyść historię")
@@ -1489,6 +1945,10 @@ private fun checkWin() {
             .show()
     }
 
+    /**
+     * @brief Czyści całą historię gier z serwera
+     * @post Historia usunięta, Toast z potwierdzeniem
+     */
     private fun clearAllHistory() {
         scope.launch {
             val success = firebirdApiManager.clearAllHistory()
@@ -1502,6 +1962,12 @@ private fun checkWin() {
             }
         }
     }
+    
+    /**
+     * @brief Metoda cyklu życia onDestroy
+     * @details Zatrzymuje timer Mystery Box i zwalnia zasoby dźwiękowe
+     * @post Wszystkie zasoby zwolnione
+     */
     override fun onDestroy() {
         super.onDestroy()
         mysteryBoxRunnable?.let {
@@ -1512,15 +1978,25 @@ private fun checkWin() {
 
     }
 
+    /**
+     * @brief Companion object z stałymi
+     */
     companion object {
+        /** @brief Kod żądania uprawnień lokalizacji */
         private const val LOCATION_PERMISSION_REQUEST = 1001
     }
 }
-override fun onDestroy() {
-    super.onDestroy()
-    if (::spinSound.isInitialized) spinSound.release()
-    if (::winSound.isInitialized) winSound.release()
-}
+
+/**
+ * @class TargetLocation
+ * @brief Model lokalizacji docelowej do odwiedzenia
+ * 
+ * @property latitude Szerokość geograficzna
+ * @property longitude Długość geograficzna
+ * @property radius Promień w metrach do uznania za odwiedzoną
+ * @property visited Czy lokalizacja została odwiedzona
+ * @property name Nazwa lokalizacji (domyślnie "Lokalizacja")
+ */
 data class TargetLocation(
     val latitude: Double,
     val longitude: Double,

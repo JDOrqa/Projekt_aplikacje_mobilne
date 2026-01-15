@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center"
+    android:background="#121212">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🎰 SlotMaster"
+        android:textSize="32sp"
+        android:textColor="#00FF00"
+        android:layout_marginBottom="40dp"/>
+
+    <EditText
+        android:id="@+id/etLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="#0088FF"
+        android:hint="Login"
+        android:minHeight="48dp"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    <EditText
+        android:id="@+id/etPass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:backgroundTint="#0088FF"
+        android:hint="Hasło"
+        android:inputType="textPassword"
+        android:minHeight="48dp"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ZALOGUJ"
+        android:textSize="18sp"
+        android:backgroundTint="#00FF00"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="REJESTRACJA"
+        android:textSize="18sp"
+        android:backgroundTint="#0088FF"
+        android:layout_marginBottom="30dp"/>
+
+    <Button
+        android:id="@+id/btnSkip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GRAJ BEZ LOGOWANIA"
+        android:textSize="16sp"
+        android:backgroundTint="#FF8800"/>
+
+</LinearLayout>
