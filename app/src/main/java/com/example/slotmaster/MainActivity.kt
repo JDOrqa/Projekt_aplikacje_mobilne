@@ -283,18 +283,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
 
 
-
-        // 2. Binding INICJALIZACJA - TO MUSI BYĆ NAJPIERW!
-
-
         // dźwięki
         spinSound = MediaPlayer.create(this, R.raw.spin)
         winSound = MediaPlayer.create(this, R.raw.wygrana)
-
-// Głośność
         spinSound.setVolume(1f, 1f)
         winSound.setVolume(1f, 1f)
-
 
         // 3. Inicjalizacja UI elementów
         slot1 = binding.slot1
@@ -307,10 +300,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         slot8 = binding.slot8
         slot9 = binding.slot9
 
-        // 4. Inicjalizacja managerów - TYLKO Firebird API
-        Log.d("MainActivity", "🔧 Ustawiam userId: $user_id")
 
-        // Inicjalizuj FirebirdApiManager
+        // 🔽 WYCZYŚĆ UI PRZED WSZYSTKIM
+        clearUIStateImmediately()
+
+        // 4. Inicjalizacja managerów
+        Log.d("MainActivity", "🔧 Ustawiam userId: $user_id")
         firebirdApiManager = FirebirdApiManager(this)
 
         // Ustaw userId JEŚLI ISTNIEJE
@@ -319,22 +314,40 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             Log.d("MainActivity", "✅ Ustawiono userId w FirebirdApiManager: $user_id")
         } else {
             Log.e("MainActivity", "❌ BRAK user_id! Używam domyślnego")
-            // Ustaw domyślny (z SharedPreferences lub nowy)
             val defaultUserId = firebirdApiManager.getCurrentUserId()
             Log.d("MainActivity", "🔄 Używam domyślnego userId: $defaultUserId")
         }
-        // 5. Ładowanie danych - NAJPIERW LOKALNIE, POTEM SERWER
-        loadFromSharedPreferences()  // 🔽 NAJPIERW ZAWSZE Z SHAREDPREFERENCES
 
+        // 🔽 5. ŁADOWANIE DANYCH W POPRAWNEJ KOLEJNOŚCI:
+
+        // A) Najpierw załaduj z SharedPreferences
+        loadFromSharedPreferences()
+
+        // B) NATYCHMIAST zaktualizuj UI z załadowanymi danymi
+        updateUI()
+
+        // C) Włącz przyciski (jeśli były wyłączone w clearUIStateImmediately)
+        binding.btnSpin.isEnabled = true
+        binding.btnMysteryBox.isEnabled = true
+
+        // D) Dopiero teraz spróbuj pobrać z serwera (asynchronicznie)
         scope.launch {
             try {
-
-                // 🔽 POTEM SPRÓBUJ Z SERWERA
                 val serverGameState = firebirdApiManager.loadGameStateFromServer()
                 if (serverGameState != null) {
                     // SERWER MA DANE - ZASTOSUJ JE
                     applyGameStateFromServer(serverGameState)
                     Log.d("MainActivity", "✅ Załadowano stan z SERWERA")
+
+                    // 🔽 WAŻNE: ODŚWIEŻ UI PO ZAŁADOWANIU Z SERWERA
+                    runOnUiThread {
+                        updateUI()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "✅ Zsynchronizowano z serwerem",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 } else {
                     Log.d("MainActivity", "⚠️ Serwer nie ma danych, używam lokalnych")
                 }
@@ -354,14 +367,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setupBottomNavigation()
         initializeMysteryBox()
 
-        // 7. Update UI
-        updateUI()
-
-
-
         Log.d("MainActivity", "🎮 Stan po onCreate: balance=$balance, spiny=$spinsCount, userId=${firebirdApiManager.getCurrentUserId()}")
-
-
     }
 
     /**
@@ -419,6 +425,36 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
+
+    private fun clearUIStateImmediately() {
+        runOnUiThread {
+            // 1. Wyczyść TextView
+            binding.tvBalance.text = "Ładowanie..."
+            binding.tvBetInfo.text = "Ładowanie..."
+            binding.tvLocationInfo.text = ""
+            binding.tvLightInfo.text = ""
+            binding.tvMysteryBoxTimer.text = "🎁 Ładowanie..."
+
+            // 2. Wyczyść sloty (jeśli binding jest już zainicjalizowany)
+            if (this::binding.isInitialized) {
+                getSlotsList().forEach { slot ->
+                    slot.setImageResource(R.drawable.cherry)
+                    slot.setBackgroundResource(R.drawable.slot_border_dark)
+                }
+            }
+
+            // 3. Zresetuj checkboxy
+            getLineCheckboxesList().forEach { checkbox ->
+                checkbox.isChecked = false
+            }
+
+            // 4. Wyłącz przyciski na chwilę
+            binding.btnSpin.isEnabled = false
+            binding.btnMysteryBox.isEnabled = false
+
+            Log.d("MainActivity", "🧹 Wyczyszczono UI")
+        }
+    }
 
     // Inicjalizacja Mystery Box
     
@@ -721,18 +757,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
      * @post Dialog z rozszerzonymi opcjami aplikacji
      */
     private fun showMoreOptionsDialog() {
-        val options = arrayOf("🔧 Test API", "📊 Historia", "🔄 Reset Gry", "ℹ️ Informacje", "🏆 Ranking graczy", "Wyloguj się")
+        val options = arrayOf("🔄 Reset Gry", "ℹ️ Informacje", "🏆 Ranking graczy", "🔧 Wyloguj się")
 
         AlertDialog.Builder(this)
             .setTitle("⚙️ Więcej Opcji")
             .setItems(options) { dialog, which ->
                 when (which) {
-                    0 -> testApiConnection()
-                    1 -> showHistory()
-                    2 -> resetGame()
-                    3 -> showGameInfoDialog()
-                    4 -> showRanking()
-                    5 -> showLogoutDialog()
+                    0 -> resetGame()
+                    1 -> showGameInfoDialog()
+                    2 -> showRanking()
+                    3 -> showLogoutDialog()
                 }
             }
             .setNegativeButton("Anuluj", null)
